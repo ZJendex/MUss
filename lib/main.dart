@@ -1,16 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:muss/io.dart';
 import 'package:pie_chart/pie_chart.dart';
 import 'package:new_gradient_app_bar/new_gradient_app_bar.dart';
 import 'txtDB.dart';
 
-FileIO fileCdays = FileIO("current_days.txt");
-FileIO fileCcourses = FileIO("counter_ongoing_courses.txt");
-FileIO fileDBInDays = FileIO("database.txt");
-FileIO fileDBBackup = FileIO("history.txt");
-// start Datetime
-FileIO fileConst = FileIO("const.txt");
 const String appName = "MUss";
+TxtDB tdb = TxtDB();
 
 void main() {
   runApp(const MyApp());
@@ -102,7 +96,7 @@ class _CoursesState extends State<Courses> {
                       padding: EdgeInsets.only(right: 20.0),
                       child: GestureDetector(
                         onTap: () {
-                          resetDB();
+                          tdb.resetDB();
                         },
                         child: const Icon(
                           Icons.restart_alt,
@@ -130,15 +124,18 @@ class _CoursesState extends State<Courses> {
                 Map<String, double> cumulateCourseDuration = {};
                 DateTime now = DateTime.now();
                 List<List<String>> dBInfo = [];
-                List<double> cCD = List.filled(_coursesList.length, 0);
-                await getDBInfo(fileDBInDays, dBInfo);
-                String theBeginning = await fileConst.read();
+                await tdb.getDBInfo().then((value) => dBInfo = value);
+                String theBeginning = "";
+                await tdb.fileConst
+                    .read()
+                    .then((value) => theBeginning = value);
                 String totalDuration =
                     DateTimeRange(start: DateTime.parse(theBeginning), end: now)
                         .duration
-                        .inMinutes
+                        .inSeconds
                         .toString();
                 // add up times in each day
+                List<double> cCD = List.filled(_coursesList.length, 0);
                 for (var day in dBInfo) {
                   for (int i = 0; i < _coursesList.length; i++) {
                     if (day[i] != "0") {
@@ -253,17 +250,18 @@ class _CoursesState extends State<Courses> {
   void courseClicked(BuildContext context, int index) async {
     DateTime now = DateTime.now();
     String courseName = _coursesList[index];
-    String currentDays = await fileCdays.read();
+    String currentDays = "";
+    await tdb.fileCdays.read().then((value) => currentDays = value);
     String duration;
 
     // retrieve current course info
     List<String> coursesList = [];
-    await getCoursesList(fileCcourses, coursesList);
+    await tdb.getCoursesList().then((value) => coursesList = value);
 
     // retrieve current DB info
     // each line is a day start from day one
     List<List<String>> dBInfo = [];
-    await getDBInfo(fileDBInDays, dBInfo);
+    await tdb.getDBInfo().then((value) => dBInfo = value);
 
     // check if no course conflict
     bool conflict = false;
@@ -286,11 +284,8 @@ class _CoursesState extends State<Courses> {
       });
       // update counter for today's courses
       coursesList[index] = now.toString();
-      await fileCcourses.clear();
-      for (var coursesCount in coursesList) {
-        await fileCcourses.append("$coursesCount|");
-      }
-      await fileDBBackup.append("$courseName from ${now.toString()}");
+      await tdb.updateOngoingCoursesList(coursesList);
+      await tdb.fileDBBackup.append("$courseName from ${now.toString()}");
     } else {
       // course finished
       // current courses finished
@@ -301,46 +296,34 @@ class _CoursesState extends State<Courses> {
       duration =
           DateTimeRange(start: DateTime.parse(coursesList[index]), end: now)
               .duration
-              .inMinutes
+              .inSeconds
               .toString();
       // clean the counter
       coursesList[index] = "0";
-      await fileCcourses.clear();
-      for (var coursesCount in coursesList) {
-        await fileCcourses.append("$coursesCount|");
-      }
+      await tdb.updateOngoingCoursesList(coursesList);
       // update the duration info in DB
       int i = int.parse(currentDays) - 1;
       dBInfo[i][index] =
           (int.parse(duration) + int.parse(dBInfo[i][index])).toString();
-      await fileDBInDays.clear();
-      for (var day in dBInfo) {
-        for (var course in day) {
-          await fileDBInDays.append("$course|");
-        }
-        await fileDBInDays.append("\n");
-      }
-      await fileDBBackup.append(
+      await tdb.updateDB(dBInfo);
+      await tdb.fileDBBackup.append(
           " to ${now.toString()} $courseName for about $duration minutes \n");
       // check if its the new day --- after sleep
       if (courseName == "SLEEP") {
-        String newDays = (int.parse(currentDays) + 1).toString();
-        fileCdays.write(newDays);
-        await fileDBInDays.append("0|0|0|0|0|0\n");
-        await fileDBBackup.append("NEW DAY FROM HERE\n");
+        await tdb.newDay(currentDays);
       }
     }
   }
 
   void initInfo() async {
-    String cds = await fileCdays.read();
+    String cds = await tdb.fileCdays.read();
     // if it's the first time open the app
     if (cds.isEmpty) {
-      resetDB();
+      tdb.resetDB();
     }
     // loading the ongoing course curcumstances
     List<String> coursesList = [];
-    await getCoursesList(fileCcourses, coursesList);
+    await tdb.getCoursesList().then((value) => coursesList = value);
     for (int i = 0; i < coursesList.length; i++) {
       if (coursesList[i] != "0") {
         courseOngoing[i] = true;
@@ -351,20 +334,6 @@ class _CoursesState extends State<Courses> {
     setState(() {
       loadingFinish = true;
     });
-  }
-
-  void resetDB() async {
-    // Current days from begin
-    fileCdays.write("1");
-    // assignment of today
-    fileCcourses.write("0|0|0|0|0|0");
-    // the database in days for each course
-    // Total: 5 courses * n days
-    fileDBInDays.write("0|0|0|0|0|0\n");
-    // the backup for each intervals
-    fileDBBackup.write("");
-    // save the starting datetime
-    fileConst.write(DateTime.now().toString());
   }
 
   IconData? _courseIcon(int index, List<String> coursesList) {
