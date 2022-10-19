@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:pie_chart/pie_chart.dart';
 import 'package:new_gradient_app_bar/new_gradient_app_bar.dart';
+import 'src/pieChart.dart';
 import 'txtDB.dart';
+import 'src/courseIconCorrespondance.dart';
 
 const String appName = "MUss";
 TxtDB tdb = TxtDB();
@@ -16,7 +18,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      title: 'MUss',
+      title: appName,
       home: Courses(),
     );
   }
@@ -32,7 +34,6 @@ class Courses extends StatefulWidget {
 class _CoursesState extends State<Courses> {
   // maxium 10 courses
   List<bool> courseOngoing = List.filled(10, false);
-  final _listViewKey = GlobalKey();
   bool loadingFinish = false;
   final List<String> _coursesList = [
     "SLEEP",
@@ -41,30 +42,6 @@ class _CoursesState extends State<Courses> {
     "READ",
     "WORK",
     "WORKOUT",
-  ];
-  final List<Color> brownessColorList = const [
-    Color.fromARGB(255, 0, 78, 162), // SLEEP
-    Color.fromARGB(255, 0, 113, 171), // NAP
-    Color.fromARGB(255, 172, 108, 86), // WRITE
-    Color.fromARGB(255, 95, 39, 29), // READ
-    Color.fromARGB(255, 212, 166, 81), // WORK
-    Color.fromARGB(255, 228, 142, 81), // WORKOUT
-    Color.fromARGB(255, 101, 87, 86), // OTHERS
-    Color.fromARGB(255, 101, 87, 86), // RANDOM1
-    Color.fromARGB(255, 101, 87, 86), // RANDOM2
-    Color.fromARGB(255, 101, 87, 86) // RANDOM3
-  ];
-  final List<Color> pinknessColorList = const [
-    Color.fromARGB(255, 0, 78, 162), // SLEEP
-    Color.fromARGB(255, 0, 113, 171), // NAP
-    Color.fromARGB(255, 156, 100, 167), // WRITE
-    Color.fromARGB(255, 227, 198, 207), // READ
-    Color.fromARGB(255, 199, 45, 117), // WORK
-    Color.fromARGB(255, 92, 16, 40), // WORKOUT
-    Color.fromARGB(255, 101, 87, 86), // OTHERS
-    Color.fromARGB(255, 101, 87, 86), // RANDOM1
-    Color.fromARGB(255, 101, 87, 86), // RANDOM2
-    Color.fromARGB(255, 101, 87, 86) // RANDOM3
   ];
 
   @override
@@ -107,7 +84,6 @@ class _CoursesState extends State<Courses> {
                 margin: const EdgeInsets.all(10),
                 child: ListView.separated(
                     physics: const NeverScrollableScrollPhysics(),
-                    key: _listViewKey,
                     itemBuilder: (BuildContext context, int index) {
                       return _courses(context, index);
                     },
@@ -238,7 +214,7 @@ class _CoursesState extends State<Courses> {
               width: 20,
             ),
             Icon(
-              _courseIcon(index, _coursesList),
+              courseIcon(index, _coursesList),
               color: courseOngoing[index]
                   ? const Color.fromARGB(255, 217, 87, 74)
                   : Colors.black,
@@ -259,14 +235,13 @@ class _CoursesState extends State<Courses> {
     await tdb.getCoursesList().then((value) => coursesList = value);
 
     // retrieve current DB info
-    // each line is a day start from day one
     List<List<String>> dBInfo = [];
     await tdb.getDBInfo().then((value) => dBInfo = value);
 
     // check if no course conflict
     bool conflict = false;
     for (int i = 0; i < coursesList.length; i++) {
-      // if there is an ongoing course and its different from the current clicked course
+      // if clicked course doesn't match the ongoing course
       if (coursesList[i] != '0' && i != index) {
         setState(() {
           conflict = true;
@@ -277,7 +252,6 @@ class _CoursesState extends State<Courses> {
     if (conflict) {
       // do nothing if ongoing course conflict happened
     } else if (coursesList[index] == '0') {
-      // course start
       // new courses started
       setState(() {
         courseOngoing[index] = true;
@@ -287,7 +261,6 @@ class _CoursesState extends State<Courses> {
       await tdb.updateOngoingCoursesList(coursesList);
       await tdb.fileDBBackup.append("$courseName from ${now.toString()}");
     } else {
-      // course finished
       // current courses finished
       setState(() {
         courseOngoing[index] = false;
@@ -334,24 +307,5 @@ class _CoursesState extends State<Courses> {
     setState(() {
       loadingFinish = true;
     });
-  }
-
-  IconData? _courseIcon(int index, List<String> coursesList) {
-    switch (coursesList[index]) {
-      case "SLEEP":
-        return Icons.bedtime;
-      case "WRITE":
-        return Icons.edit;
-      case "READ":
-        return Icons.menu_book;
-      case "WORK":
-        return Icons.people;
-      case "WORKOUT":
-        return Icons.fitness_center;
-      case "NAP":
-        return Icons.notifications_paused;
-      default:
-        return Icons.add;
-    }
   }
 }
