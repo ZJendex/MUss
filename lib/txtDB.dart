@@ -1,4 +1,5 @@
 import 'io.dart';
+import 'package:flutter/material.dart';
 
 class TxtDB {
   FileIO fileCdays = FileIO("current_days.txt");
@@ -6,8 +7,16 @@ class TxtDB {
   FileIO fileDBInDays = FileIO("database.txt");
   FileIO fileDBBackup = FileIO("history.txt");
   FileIO fileConst = FileIO("const.txt");
+  final List<String> coursesList = [
+    "SLEEP",
+    "NAP",
+    "WRITE",
+    "READ",
+    "WORK",
+    "WORKOUT",
+  ];
 
-  TxtDB() {}
+  TxtDB();
 
   void resetDB() async {
     // Current days from begin
@@ -74,5 +83,38 @@ class TxtDB {
     fileCdays.write(newDays);
     await fileDBInDays.append("0|0|0|0|0|0\n");
     await fileDBBackup.append("NEW DAY FROM HERE\n");
+  }
+
+  // _coursesList is the name list for all courses
+  cumulateCoursesDuration() async {
+    Map<String, double> cumulateCoursesDuration = {};
+    DateTime now = DateTime.now();
+    List<List<String>> dBInfo = [];
+    await getDBInfo().then((value) => dBInfo = value);
+    String theBeginning = "";
+    await fileConst.read().then((value) => theBeginning = value);
+    String totalDuration =
+        DateTimeRange(start: DateTime.parse(theBeginning), end: now)
+            .duration
+            .inSeconds
+            .toString();
+    // add up times in each day
+    List<double> cCD = List.filled(coursesList.length, 0);
+    for (var day in dBInfo) {
+      for (int i = 0; i < coursesList.length; i++) {
+        if (day[i] != "0") {
+          cCD[i] = cCD[i] + double.parse(day[i]);
+        }
+      }
+    }
+    // fill cumulateCoursesDuration
+    double cumulateAll = 0;
+    for (int i = 0; i < coursesList.length; i++) {
+      cumulateCoursesDuration[coursesList[i]] = cCD[i];
+      cumulateAll = cumulateAll + cCD[i];
+    }
+    cumulateCoursesDuration["OTHERS"] =
+        double.parse(totalDuration) - cumulateAll;
+    return cumulateCoursesDuration;
   }
 }

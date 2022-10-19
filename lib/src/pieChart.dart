@@ -24,3 +24,13 @@ List<Color> pinknessColorList = const [
   Color.fromARGB(255, 101, 87, 86), // RANDOM2
   Color.fromARGB(255, 101, 87, 86) // RANDOM3
 ];
+
+Map<String, double> testPieChart = {
+  "SLEEP": 8,
+  "NAP": 1,
+  "WRITE": 1,
+  "READ": 2,
+  "WORK": 6,
+  "WORKOUT": 0.5,
+  "OTHERS": 5.5
+};

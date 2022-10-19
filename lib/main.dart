@@ -35,24 +35,11 @@ class _CoursesState extends State<Courses> {
   // maxium 10 courses
   List<bool> courseOngoing = List.filled(10, false);
   bool loadingFinish = false;
-  final List<String> _coursesList = [
-    "SLEEP",
-    "NAP",
-    "WRITE",
-    "READ",
-    "WORK",
-    "WORKOUT",
-  ];
 
   @override
   void initState() {
     super.initState();
     initInfo();
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
   }
 
   @override
@@ -70,7 +57,7 @@ class _CoursesState extends State<Courses> {
                 ]),
                 actions: <Widget>[
                   Padding(
-                      padding: EdgeInsets.only(right: 20.0),
+                      padding: const EdgeInsets.only(right: 20.0),
                       child: GestureDetector(
                         onTap: () {
                           tdb.resetDB();
@@ -92,51 +79,15 @@ class _CoursesState extends State<Courses> {
                         height: 8,
                       );
                     },
-                    itemCount: _coursesList.length)),
+                    itemCount: tdb.coursesList.length)),
             floatingActionButton: FloatingActionButton(
               backgroundColor: const Color.fromARGB(255, 81, 118, 147), // 马耳他蓝
               onPressed: () async {
                 // get pie chart for the course distribution
-                Map<String, double> cumulateCourseDuration = {};
-                DateTime now = DateTime.now();
-                List<List<String>> dBInfo = [];
-                await tdb.getDBInfo().then((value) => dBInfo = value);
-                String theBeginning = "";
-                await tdb.fileConst
-                    .read()
-                    .then((value) => theBeginning = value);
-                String totalDuration =
-                    DateTimeRange(start: DateTime.parse(theBeginning), end: now)
-                        .duration
-                        .inSeconds
-                        .toString();
-                // add up times in each day
-                List<double> cCD = List.filled(_coursesList.length, 0);
-                for (var day in dBInfo) {
-                  for (int i = 0; i < _coursesList.length; i++) {
-                    if (day[i] != "0") {
-                      cCD[i] = cCD[i] + double.parse(day[i]);
-                    }
-                  }
-                }
-                // fill cumulateCoursesDuration
-                double cumulateAll = 0;
-                for (int i = 0; i < _coursesList.length; i++) {
-                  cumulateCourseDuration[_coursesList[i]] = cCD[i];
-                  cumulateAll = cumulateAll + cCD[i];
-                }
-                cumulateCourseDuration["OTHERS"] =
-                    double.parse(totalDuration) - cumulateAll;
-
-                Map<String, double> testPieChart = {
-                  "SLEEP": 8,
-                  "NAP": 1,
-                  "WRITE": 1,
-                  "READ": 2,
-                  "WORK": 6,
-                  "WORKOUT": 0.5,
-                  "OTHERS": 5.5
-                };
+                Map<String, double> cumulateCoursesDuration = {};
+                await tdb
+                    .cumulateCoursesDuration()
+                    .then((value) => cumulateCoursesDuration = value);
                 showDialog(
                     context: context,
                     builder: (context) {
@@ -160,7 +111,7 @@ class _CoursesState extends State<Courses> {
                               decoration: TextDecoration.none,
                               fontSize: 12,
                             )),
-                            dataMap: cumulateCourseDuration),
+                            dataMap: cumulateCoursesDuration),
                       );
                     });
               },
@@ -201,7 +152,7 @@ class _CoursesState extends State<Courses> {
               height: 80,
               child: Center(
                 child: Text(
-                  _coursesList[index],
+                  tdb.coursesList[index],
                   style: const TextStyle(
                     letterSpacing: 7,
                     fontWeight: FontWeight.w700,
@@ -214,7 +165,7 @@ class _CoursesState extends State<Courses> {
               width: 20,
             ),
             Icon(
-              courseIcon(index, _coursesList),
+              courseIcon(index, tdb.coursesList),
               color: courseOngoing[index]
                   ? const Color.fromARGB(255, 217, 87, 74)
                   : Colors.black,
@@ -225,7 +176,7 @@ class _CoursesState extends State<Courses> {
 
   void courseClicked(BuildContext context, int index) async {
     DateTime now = DateTime.now();
-    String courseName = _coursesList[index];
+    String courseName = tdb.coursesList[index];
     String currentDays = "";
     await tdb.fileCdays.read().then((value) => currentDays = value);
     String duration;
