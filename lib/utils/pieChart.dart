@@ -26,11 +26,11 @@ List<Color> pinknessColorList = const [
 ];
 
 Map<String, double> testPieChart = {
-  "SLEEP": 8,
-  "NAP": 1,
-  "WRITE": 1,
-  "READ": 2,
-  "WORK": 6,
-  "WORKOUT": 0.5,
-  "OTHERS": 5.5
+  "SLEEP": 80,
+  "NAP": 10,
+  "WRITE": 10,
+  "READ": 20,
+  "WORK": 60,
+  "WORKOUT": 50,
+  "OTHERS": 55
 };

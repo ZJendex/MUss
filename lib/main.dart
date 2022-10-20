@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:pie_chart/pie_chart.dart';
+import 'pkgs/pie_chart/pie_chart.dart';
 import 'package:new_gradient_app_bar/new_gradient_app_bar.dart';
-import 'src/pieChart.dart';
+import 'utils/pieChart.dart';
 import 'txtDB.dart';
-import 'src/courseIconCorrespondance.dart';
+import 'utils/courseIconCorrespondance.dart';
 
 const String appName = "MUss";
 TxtDB tdb = TxtDB();
@@ -88,32 +88,47 @@ class _CoursesState extends State<Courses> {
                 await tdb
                     .cumulateCoursesDuration()
                     .then((value) => cumulateCoursesDuration = value);
+                String currentDays = await tdb.fileCdays.read();
                 showDialog(
                     context: context,
                     builder: (context) {
                       return Container(
-                        padding: const EdgeInsets.all(10),
+                        padding: const EdgeInsets.all(50),
                         child: PieChart(
+                            chartLegendSpacing: 45,
+                            centerText: "DAY $currentDays",
+                            centerTextStyle: const TextStyle(
+                                color: Colors.white70,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 18),
                             chartValuesOptions: const ChartValuesOptions(
                               showChartValueBackground: false,
                               showChartValues: true,
                               showChartValuesInPercentage: true,
                               showChartValuesOutside: false,
-                              chartValueStyle: TextStyle(
-                                  color: Color.fromARGB(255, 200, 233, 84)),
+                              chartValueStyle: TextStyle(color: Colors.white),
                             ),
                             emptyColor: Colors.white,
                             chartType: ChartType.ring,
+                            ringStrokeWidth: 40,
                             colorList: pinknessColorList,
-                            legendOptions: const LegendOptions(
-                                legendTextStyle: TextStyle(
-                              color: Color.fromARGB(255, 200, 233, 84),
-                              decoration: TextDecoration.none,
-                              fontSize: 12,
-                            )),
+                            legendOptions: LegendOptions(
+                                legendTextStyle: const TextStyle(
+                                  color: Color.fromARGB(210, 200, 233, 84),
+                                  decoration: TextDecoration.none,
+                                  fontSize: 12,
+                                ),
+                                legendTailTextStyle: TextStyle(
+                                  color: Colors.white.withOpacity(0.88),
+                                  decoration: TextDecoration.none,
+                                  fontSize: 12,
+                                ),
+                                legendPosition: LegendPosition.bottom,
+                                showLegendsInRow: false),
                             dataMap: cumulateCoursesDuration),
                       );
-                    });
+                    },
+                    barrierColor: const Color.fromARGB(225, 0, 0, 0));
               },
               tooltip: 'Check the time use in pie chart',
               child: const Icon(Icons.pie_chart),
@@ -220,7 +235,7 @@ class _CoursesState extends State<Courses> {
       duration =
           DateTimeRange(start: DateTime.parse(coursesList[index]), end: now)
               .duration
-              .inSeconds
+              .inMinutes
               .toString();
       // clean the counter
       coursesList[index] = "0";

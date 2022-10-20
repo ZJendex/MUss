@@ -85,7 +85,6 @@ class TxtDB {
     await fileDBBackup.append("NEW DAY FROM HERE\n");
   }
 
-  // _coursesList is the name list for all courses
   cumulateCoursesDuration() async {
     Map<String, double> cumulateCoursesDuration = {};
     DateTime now = DateTime.now();
@@ -96,7 +95,7 @@ class TxtDB {
     String totalDuration =
         DateTimeRange(start: DateTime.parse(theBeginning), end: now)
             .duration
-            .inSeconds
+            .inMinutes
             .toString();
     // add up times in each day
     List<double> cCD = List.filled(coursesList.length, 0);
