@@ -35,6 +35,9 @@ class _CoursesState extends State<Courses> {
   // maxium 10 courses
   List<bool> courseOngoing = List.filled(10, false);
   bool loadingFinish = false;
+  int _bottomNavigatorSelectedIndex = 0;
+  String _courseEditSelectedCourse = tdb.coursesList[0];
+  int _minuteChange = 0;
 
   @override
   void initState() {
@@ -95,7 +98,7 @@ class _CoursesState extends State<Courses> {
                       return Container(
                         padding: const EdgeInsets.all(50),
                         child: PieChart(
-                            chartLegendSpacing: 45,
+                            chartLegendSpacing: 70,
                             centerText: "DAY $currentDays",
                             centerTextStyle: const TextStyle(
                                 color: Colors.white70,
@@ -103,14 +106,14 @@ class _CoursesState extends State<Courses> {
                                 fontSize: 18),
                             chartValuesOptions: const ChartValuesOptions(
                               showChartValueBackground: false,
-                              showChartValues: true,
+                              showChartValues: false,
                               showChartValuesInPercentage: true,
                               showChartValuesOutside: false,
                               chartValueStyle: TextStyle(color: Colors.white),
                             ),
                             emptyColor: Colors.white,
                             chartType: ChartType.ring,
-                            ringStrokeWidth: 40,
+                            ringStrokeWidth: 100,
                             colorList: pinknessColorList,
                             legendOptions: LegendOptions(
                                 legendTextStyle: const TextStyle(
@@ -135,6 +138,23 @@ class _CoursesState extends State<Courses> {
             ),
             floatingActionButtonLocation:
                 FloatingActionButtonLocation.centerDocked,
+            bottomNavigationBar: BottomNavigationBar(
+              items: const <BottomNavigationBarItem>[
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.data_thresholding_outlined),
+                  label: 'Report',
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.add_box_outlined),
+                  label: 'Edit',
+                ),
+              ],
+              currentIndex: _bottomNavigatorSelectedIndex,
+              selectedItemColor: Colors.black,
+              unselectedItemColor: Colors.black,
+              selectedFontSize: 12,
+              onTap: _onItemTapped,
+            ),
           )
         : Scaffold(
             // Loading Page
@@ -273,5 +293,137 @@ class _CoursesState extends State<Courses> {
     setState(() {
       loadingFinish = true;
     });
+  }
+
+  updateDB(String course, int minute) async {
+    List<List<String>> db = [];
+    await tdb.getDBInfo().then((value) => db = value);
+    int courseIndex = 0;
+    for (int i = 0; i < tdb.coursesList.length; i++) {
+      if (tdb.coursesList[i] == course) {
+        courseIndex = i;
+        break;
+      }
+    }
+    print("minute is $minute");
+    print("int parse is ${int.parse(db[db.length - 1][courseIndex])}");
+    // only able to edit today's data: db[currentDay]
+    String changeResult =
+        (int.parse(db[db.length - 1][courseIndex]) + minute).toString();
+    print("change result is $changeResult");
+    if (changeResult != "" || changeResult != "0") {
+      db[db.length - 1][courseIndex] = changeResult;
+      await tdb.updateDB(db);
+    }
+  }
+
+  void _onItemTapped(int index) {
+    if (index == 0) {
+      // give report
+
+    } else {
+      // courses edit on current days
+      courseEditPage(context);
+    }
+  }
+
+  courseEditPage(BuildContext context) {
+    showModalBottomSheet<void>(
+      context: context,
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          // new state
+          builder: (context, setState) {
+            return Container(
+              height: 200,
+              color: Colors.amber,
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    Container(
+                        child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        DropdownButton<String>(
+                          value: _courseEditSelectedCourse,
+                          items: tdb.coursesList.map((String items) {
+                            return DropdownMenuItem(
+                              value: items,
+                              child: Text(items),
+                            );
+                          }).toList(),
+                          onChanged: (String? val) {
+                            setState(() {
+                              _courseEditSelectedCourse = val!;
+                            });
+                          },
+                        ),
+                        Container(
+                          width: 30,
+                          height: 30,
+                        ),
+                        Container(
+                          child: Row(
+                            children: [
+                              Text("$_minuteChange min"),
+                              IconButton(
+                                icon: Icon(Icons.add),
+                                onPressed: () {
+                                  setState(
+                                    () {
+                                      _minuteChange = _minuteChange + 10;
+                                    },
+                                  );
+                                },
+                              ),
+                              IconButton(
+                                icon: Icon(Icons.minimize),
+                                onPressed: () {
+                                  setState(
+                                    () {
+                                      _minuteChange = _minuteChange - 10;
+                                    },
+                                  );
+                                },
+                              ),
+                            ],
+                          ),
+                        )
+                      ],
+                    )),
+                    Container(
+                      height: 20,
+                    ),
+                    Container(
+                      padding: EdgeInsets.symmetric(horizontal: 30),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        mainAxisSize: MainAxisSize.max,
+                        children: <Widget>[
+                          ElevatedButton(
+                            child: const Text('Cancel'),
+                            onPressed: () => Navigator.pop(context),
+                          ),
+                          ElevatedButton(
+                            child: const Text('Save'),
+                            onPressed: () async {
+                              Navigator.pop(context);
+                              // if save button causing a lag, modify this method
+                              await updateDB(
+                                  _courseEditSelectedCourse, _minuteChange);
+                            },
+                          ),
+                        ],
+                      ),
+                    )
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
   }
 }

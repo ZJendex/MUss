@@ -236,11 +236,9 @@ class _PieChartState extends State<PieChart>
       return Padding(
         padding: padding!,
         child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Container(
-              width: 45,
-            ),
             Wrap(
               direction: widget.legendOptions.showLegendsInRow
                   ? Axis.horizontal
