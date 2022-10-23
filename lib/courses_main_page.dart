@@ -2,18 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:muss/update_database_widget.dart';
 import 'pkgs/pie_chart/pie_chart.dart';
 import 'package:new_gradient_app_bar/new_gradient_app_bar.dart';
-import 'utils/pieChart.dart';
 import 'txtDB.dart';
-import 'utils/courseIconCorrespondance.dart';
+import 'utils/courses_icon_correspondance.dart';
 
-class Courses extends StatefulWidget {
-  const Courses({super.key});
+class CoursesMainPage extends StatefulWidget {
+  const CoursesMainPage({super.key});
 
   @override
-  State<Courses> createState() => _CoursesState();
+  State<CoursesMainPage> createState() => _CoursesMainPageState();
 }
 
-class _CoursesState extends State<Courses> {
+class _CoursesMainPageState extends State<CoursesMainPage> {
   String appName = "MUss";
   TxtDB tdb = TxtDB();
   List<bool> courseOngoing = List.filled(10, false); // maxium 10 courses
@@ -130,7 +129,7 @@ class _CoursesState extends State<Courses> {
     return NewGradientAppBar(
         title: Text(
           appName,
-          style: TextStyle(fontSize: 30, fontWeight: FontWeight.w800),
+          style: const TextStyle(fontSize: 30, fontWeight: FontWeight.w800),
         ),
         gradient: const LinearGradient(colors: [
           Color.fromARGB(255, 81, 118, 147), // 马耳他蓝
@@ -159,25 +158,23 @@ class _CoursesState extends State<Courses> {
         onTap: () => courseClicked(context, index),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Container(
-              width: 30,
+            const SizedBox(
+              width: 10,
             ),
-            SizedBox(
+            Container(
               height: 80,
-              child: Center(
-                child: Text(
-                  tdb.coursesList[index],
-                  style: const TextStyle(
-                    letterSpacing: 7,
-                    fontWeight: FontWeight.w700,
-                    fontStyle: FontStyle.italic,
-                  ),
+              padding: const EdgeInsets.only(right: 20),
+              alignment: Alignment.center,
+              child: Text(
+                tdb.coursesList[index],
+                style: const TextStyle(
+                  letterSpacing: 7,
+                  fontWeight: FontWeight.w700,
+                  fontStyle: FontStyle.italic,
                 ),
               ),
-            ),
-            Container(
-              width: 20,
             ),
             Icon(
               courseIcon(index, tdb.coursesList),

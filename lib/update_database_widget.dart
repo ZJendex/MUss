@@ -54,7 +54,7 @@ class _UpdateDatabaseWidgetState extends State<UpdateDatabaseWidget> {
                     children: [
                       Text("$_minuteChange min"),
                       IconButton(
-                        icon: Icon(Icons.add),
+                        icon: const Icon(Icons.add),
                         onPressed: () {
                           setState(
                             () {
@@ -64,7 +64,7 @@ class _UpdateDatabaseWidgetState extends State<UpdateDatabaseWidget> {
                         },
                       ),
                       IconButton(
-                        icon: Icon(Icons.remove),
+                        icon: const Icon(Icons.remove),
                         onPressed: () {
                           setState(
                             () {
@@ -82,7 +82,7 @@ class _UpdateDatabaseWidgetState extends State<UpdateDatabaseWidget> {
               height: 20,
             ),
             Container(
-              padding: EdgeInsets.symmetric(horizontal: 30),
+              padding: const EdgeInsets.symmetric(horizontal: 30),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 mainAxisSize: MainAxisSize.max,
@@ -118,12 +118,12 @@ class _UpdateDatabaseWidgetState extends State<UpdateDatabaseWidget> {
         break;
       }
     }
-    print("minute is $minute");
-    print("int parse is ${int.parse(db[db.length - 1][courseIndex])}");
+    // print("minute is $minute");
+    // print("int parse is ${int.parse(db[db.length - 1][courseIndex])}");
     // only able to edit today's data: db[currentDay]
     String changeResult =
         (int.parse(db[db.length - 1][courseIndex]) + minute).toString();
-    print("change result is $changeResult");
+    // print("change result is $changeResult");
     if (changeResult != "" || changeResult != "0") {
       db[db.length - 1][courseIndex] = changeResult;
       await widget.tdb.updateDB(db);

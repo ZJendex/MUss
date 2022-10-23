@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'course.dart';
+import 'courses_main_page.dart';
 
 const String appName = "MUss";
 
@@ -14,7 +14,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return const MaterialApp(
       title: appName,
-      home: Courses(),
+      home: CoursesMainPage(),
     );
   }
 }

@@ -3,7 +3,7 @@ import '../pie_chart.dart';
 
 import 'chart_painter.dart';
 import 'legend.dart';
-import 'legendTail.dart';
+import 'legend_tail.dart';
 import 'utils.dart';
 
 enum LegendPosition { top, bottom, left, right }
