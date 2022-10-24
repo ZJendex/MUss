@@ -14,6 +14,8 @@ IconData? courseIcon(int index, List<String> coursesList) {
       return Icons.fitness_center;
     case "NAP":
       return Icons.notifications_paused;
+    case "SOCIAL":
+      return Icons.emoji_food_beverage;
     default:
       return Icons.add;
   }

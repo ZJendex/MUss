@@ -63,6 +63,7 @@ List<Color> pinknessColorList = const [
   Color.fromARGB(255, 227, 198, 207), // READ
   Color.fromARGB(255, 199, 45, 117), // WORK
   Color.fromARGB(255, 92, 16, 40), // WORKOUT
+  Color.fromARGB(255, 78, 45, 93), // SOCIAL
   Color.fromARGB(255, 101, 87, 86), // OTHERS
   Color.fromARGB(255, 101, 87, 86), // RANDOM1
   Color.fromARGB(255, 101, 87, 86), // RANDOM2
@@ -76,5 +77,6 @@ Map<String, double> testPieChart = {
   "READ": 20,
   "WORK": 60,
   "WORKOUT": 50,
+  "SOCIAL": 40,
   "OTHERS": 55
 };

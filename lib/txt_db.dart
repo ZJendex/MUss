@@ -14,7 +14,9 @@ class TxtDB {
     "READ",
     "WORK",
     "WORKOUT",
+    "SOCIAL",
   ];
+  final String oneDayCoursesBaseData = "0|0|0|0|0|0|0";
 
   TxtDB();
 
@@ -22,10 +24,10 @@ class TxtDB {
     // Current days from begin
     fileCdays.write("1");
     // assignment of today
-    fileCcourses.write("0|0|0|0|0|0");
+    fileCcourses.write(oneDayCoursesBaseData);
     // the database in days for each course
     // Total: 5 courses * n days
-    fileDBInDays.write("0|0|0|0|0|0\n");
+    fileDBInDays.write("$oneDayCoursesBaseData\n");
     // the backup for each intervals
     fileDBBackup.write("");
     // save the starting datetime
@@ -81,7 +83,7 @@ class TxtDB {
   newDay(String currentDays) async {
     String newDays = (int.parse(currentDays) + 1).toString();
     fileCdays.write(newDays);
-    await fileDBInDays.append("0|0|0|0|0|0\n");
+    await fileDBInDays.append("$oneDayCoursesBaseData\n");
     await fileDBBackup.append("NEW DAY FROM HERE\n");
   }
 
@@ -92,11 +94,10 @@ class TxtDB {
     await getDBInfo().then((value) => dBInfo = value);
     String theBeginning = "";
     await fileConst.read().then((value) => theBeginning = value);
-    String totalDuration =
+    int totalDuration =
         DateTimeRange(start: DateTime.parse(theBeginning), end: now)
             .duration
-            .inMinutes
-            .toString();
+            .inMinutes;
     // add up times in each day
     List<double> cCD = List.filled(coursesList.length, 0);
     for (var day in dBInfo) {
@@ -113,7 +114,7 @@ class TxtDB {
       cumulateAll = cumulateAll + cCD[i];
     }
     cumulateCoursesDuration["OTHERS"] =
-        double.parse(totalDuration) - cumulateAll;
+        totalDuration - cumulateAll >= 0 ? totalDuration - cumulateAll : 0;
     return cumulateCoursesDuration;
   }
 }
