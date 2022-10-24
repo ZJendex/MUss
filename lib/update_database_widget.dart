@@ -36,8 +36,8 @@ class _UpdateDatabaseWidgetState extends State<UpdateDatabaseWidget> {
                 DropdownButton<String>(
                   value: _courseEditSelectedCourse,
                   alignment: AlignmentDirectional.centerEnd,
-                  underline: DropdownButtonHideUnderline(
-                    child: Container(),
+                  underline: const DropdownButtonHideUnderline(
+                    child: SizedBox.shrink(),
                   ),
                   items: widget.tdb.coursesList.map((String items) {
                     return DropdownMenuItem(
@@ -118,7 +118,7 @@ class _UpdateDatabaseWidgetState extends State<UpdateDatabaseWidget> {
                         const Color.fromARGB(150, 0, 49, 83)),
                     shape: MaterialStateProperty.all(RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(40)))),
-                child: const Text('Save'),
+                child: const Text('Update'),
                 onPressed: () async {
                   Navigator.pop(context);
                   // if save button causing a lag, modify this method
