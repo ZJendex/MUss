@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:muss/update_database_widget.dart';
 import 'pkgs/pie_chart/pie_chart.dart';
 import 'package:new_gradient_app_bar/new_gradient_app_bar.dart';
-import 'txtDB.dart';
+import 'txt_db.dart';
 import 'utils/courses_icon_correspondance.dart';
 
 class CoursesMainPage extends StatefulWidget {
@@ -204,7 +204,7 @@ class _CoursesMainPageState extends State<CoursesMainPage> {
     // check if no course conflict
     bool conflict = false;
     for (int i = 0; i < coursesList.length; i++) {
-      // if clicked course doesn't match the ongoing course
+      // if clicked course doesn't match the ongoing course (need alert dialog)
       if (coursesList[i] != '0' && i != index) {
         setState(() {
           conflict = true;

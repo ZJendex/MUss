@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:muss/txtDB.dart';
+import 'package:muss/txt_db.dart';
 
 class UpdateDatabaseWidget extends StatefulWidget {
   final TxtDB tdb;
@@ -24,7 +24,7 @@ class _UpdateDatabaseWidgetState extends State<UpdateDatabaseWidget> {
   Widget build(BuildContext context) {
     return Container(
       height: 200,
-      color: Colors.amber,
+      color: Color.fromARGB(190, 81, 118, 147),
       child: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -35,10 +35,21 @@ class _UpdateDatabaseWidgetState extends State<UpdateDatabaseWidget> {
               children: <Widget>[
                 DropdownButton<String>(
                   value: _courseEditSelectedCourse,
+                  alignment: AlignmentDirectional.centerEnd,
+                  underline: DropdownButtonHideUnderline(
+                    child: Container(),
+                  ),
                   items: widget.tdb.coursesList.map((String items) {
                     return DropdownMenuItem(
                       value: items,
-                      child: Text(items),
+                      child: Text(
+                        items,
+                        style: const TextStyle(
+                          letterSpacing: 3,
+                          fontSize: 18,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
                     );
                   }).toList(),
                   onChanged: (val) {
@@ -48,30 +59,49 @@ class _UpdateDatabaseWidgetState extends State<UpdateDatabaseWidget> {
                   },
                 ),
                 Container(
-                  padding: const EdgeInsets.only(left: 30),
+                  padding: const EdgeInsets.only(left: 10),
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      Text("$_minuteChange min"),
-                      IconButton(
-                        icon: const Icon(Icons.add),
-                        onPressed: () {
-                          setState(
-                            () {
-                              _minuteChange = _minuteChange + 10;
-                            },
-                          );
-                        },
+                      Text(
+                        "$_minuteChange min",
+                        style: const TextStyle(
+                          letterSpacing: 3,
+                          fontSize: 18,
+                          fontWeight: FontWeight.w700,
+                        ),
                       ),
-                      IconButton(
-                        icon: const Icon(Icons.remove),
-                        onPressed: () {
-                          setState(
-                            () {
-                              _minuteChange = _minuteChange - 10;
+                      Column(
+                        children: [
+                          IconButton(
+                            padding: const EdgeInsets.fromLTRB(10, 8, 8, 0),
+                            icon: const Icon(
+                              Icons.arrow_upward_outlined,
+                              size: 30,
+                            ),
+                            onPressed: () {
+                              setState(
+                                () {
+                                  _minuteChange = _minuteChange + 10;
+                                },
+                              );
                             },
-                          );
-                        },
+                          ),
+                          IconButton(
+                            padding: const EdgeInsets.fromLTRB(10, 0, 8, 8),
+                            icon: const Icon(
+                              Icons.arrow_downward_outlined,
+                              size: 30,
+                            ),
+                            onPressed: () {
+                              setState(
+                                () {
+                                  _minuteChange = _minuteChange - 10;
+                                },
+                              );
+                            },
+                          ),
+                        ],
                       ),
                     ],
                   ),
@@ -79,27 +109,21 @@ class _UpdateDatabaseWidgetState extends State<UpdateDatabaseWidget> {
               ],
             )),
             Container(
-              height: 20,
-            ),
-            Container(
               padding: const EdgeInsets.symmetric(horizontal: 30),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                mainAxisSize: MainAxisSize.max,
-                children: <Widget>[
-                  ElevatedButton(
-                    child: const Text('Cancel'),
-                    onPressed: () => Navigator.pop(context),
-                  ),
-                  ElevatedButton(
-                    child: const Text('Save'),
-                    onPressed: () async {
-                      Navigator.pop(context);
-                      // if save button causing a lag, modify this method
-                      await updateDB(_courseEditSelectedCourse, _minuteChange);
-                    },
-                  ),
-                ],
+              child: ElevatedButton(
+                style: ButtonStyle(
+                    fixedSize:
+                        MaterialStateProperty.all(const Size.fromWidth(150)),
+                    backgroundColor: MaterialStateProperty.all(
+                        const Color.fromARGB(150, 0, 49, 83)),
+                    shape: MaterialStateProperty.all(RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(40)))),
+                child: const Text('Save'),
+                onPressed: () async {
+                  Navigator.pop(context);
+                  // if save button causing a lag, modify this method
+                  await updateDB(_courseEditSelectedCourse, _minuteChange);
+                },
               ),
             )
           ],
@@ -118,13 +142,18 @@ class _UpdateDatabaseWidgetState extends State<UpdateDatabaseWidget> {
         break;
       }
     }
-    // print("minute is $minute");
-    // print("int parse is ${int.parse(db[db.length - 1][courseIndex])}");
     // only able to edit today's data: db[currentDay]
     String changeResult =
         (int.parse(db[db.length - 1][courseIndex]) + minute).toString();
-    // print("change result is $changeResult");
-    if (changeResult != "" || changeResult != "0") {
+    int totalSelectCourseValue = 0;
+    for (var day in db) {
+      totalSelectCourseValue =
+          totalSelectCourseValue + int.parse(day[courseIndex]);
+    }
+    if (changeResult != "" &&
+        changeResult != "0" &&
+        totalSelectCourseValue + minute >= 0) {
+      // total time should larger than zero (need alert dialog)
       db[db.length - 1][courseIndex] = changeResult;
       await widget.tdb.updateDB(db);
     }
