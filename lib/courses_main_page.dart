@@ -142,9 +142,7 @@ class _CoursesMainPageState extends State<CoursesMainPage> {
               child: Padding(
                   padding: const EdgeInsets.only(right: 20.0),
                   child: GestureDetector(
-                    onTap: () {
-                      tdb.resetDB();
-                    },
+                    onTap: () => alertOnResetDB(),
                     child: const Icon(
                       Icons.restart_alt,
                     ),
@@ -289,5 +287,73 @@ class _CoursesMainPageState extends State<CoursesMainPage> {
         },
       );
     }
+  }
+
+  Future alertOnResetDB() {
+    return showDialog(
+        context: context,
+        builder: ((context) => AlertDialog(
+            shape: ContinuousRectangleBorder(
+                borderRadius: BorderRadius.circular(70),
+                side: const BorderSide(
+                    width: 2,
+                    color: Color.fromARGB(255, 81, 118, 147),
+                    style: BorderStyle.solid)),
+            backgroundColor: const Color.fromARGB(238, 24, 49, 74),
+            content: SizedBox(
+              height: 120,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  const Text(
+                    "Confirm to wipe out the history",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w700,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  Container(
+                      padding: const EdgeInsets.only(top: 13),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          ElevatedButton(
+                            style: ButtonStyle(
+                                fixedSize: MaterialStateProperty.all(
+                                    const Size.fromWidth(100)),
+                                backgroundColor: MaterialStateProperty.all(
+                                    const Color.fromARGB(255, 81, 118, 147)),
+                                shape: MaterialStateProperty.all(
+                                    RoundedRectangleBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(40)))),
+                            child: const Text('Cancel'),
+                            onPressed: () async {
+                              Navigator.pop(context);
+                            },
+                          ),
+                          ElevatedButton(
+                            style: ButtonStyle(
+                                fixedSize: MaterialStateProperty.all(
+                                    const Size.fromWidth(100)),
+                                backgroundColor: MaterialStateProperty.all(
+                                    const Color.fromARGB(255, 81, 118, 147)),
+                                shape: MaterialStateProperty.all(
+                                    RoundedRectangleBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(40)))),
+                            child: const Text('Confirm'),
+                            onPressed: () async {
+                              tdb.resetDB();
+                              Navigator.pop(context);
+                            },
+                          ),
+                        ],
+                      ))
+                ],
+              ),
+            ))));
   }
 }

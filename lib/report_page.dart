@@ -26,7 +26,7 @@ class _reportPageState extends State<reportPage> {
   Widget build(BuildContext context) {
     return loadingFinish
         ? Container(
-            color: Colors.white,
+            color: const Color.fromARGB(255, 179, 217, 245),
             padding: const EdgeInsets.all(50),
             child: GestureDetector(
               child: PieChart(
@@ -67,7 +67,7 @@ class _reportPageState extends State<reportPage> {
               onDoubleTap: () => Navigator.pop(context),
             ))
         : Container(
-            color: Colors.amber,
+            color: const Color.fromARGB(255, 179, 217, 245),
             child: GestureDetector(
               child: const Center(
                   child: CircularProgressIndicator(
