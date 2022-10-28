@@ -143,14 +143,19 @@ class _UpdateDatabaseWidgetState extends State<UpdateDatabaseWidget> {
       }
     }
     // only able to edit today's data: db[currentDay]
-    String changeResult =
-        (int.parse(db[db.length - 1][courseIndex]) + minute).toString();
+    String changeResult = "";
     int totalSelectCourseValue = 0;
     for (var day in db) {
       totalSelectCourseValue =
           totalSelectCourseValue + int.parse(day[courseIndex]);
     }
-    if (changeResult != "" && (totalSelectCourseValue + minute >= 0)) {
+    // if time decrease amount larger than total course amount
+    if (totalSelectCourseValue + minute < 0) {
+      minute = -totalSelectCourseValue;
+    }
+    changeResult =
+        (int.parse(db[db.length - 1][courseIndex]) + minute).toString();
+    if (changeResult != "") {
       // total time should larger than zero (need alert dialog)
       db[db.length - 1][courseIndex] = changeResult;
       await widget.tdb.updateDB(db);

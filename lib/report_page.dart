@@ -50,12 +50,14 @@ class _reportPageState extends State<reportPage> {
                   colorList: pinknessColorList,
                   legendOptions: LegendOptions(
                       legendTextStyle: TextStyle(
-                        color: Color.fromARGB(255, 0, 49, 83).withOpacity(0.88),
+                        color: const Color.fromARGB(255, 0, 49, 83)
+                            .withOpacity(0.88),
                         decoration: TextDecoration.none,
                         fontSize: 12,
                       ),
                       legendTailTextStyle: TextStyle(
-                        color: Color.fromARGB(255, 0, 49, 83).withOpacity(0.88),
+                        color: const Color.fromARGB(255, 0, 49, 83)
+                            .withOpacity(0.88),
                         decoration: TextDecoration.none,
                         fontSize: 12,
                       ),
@@ -81,7 +83,7 @@ class _reportPageState extends State<reportPage> {
     await widget.tdb
         .cumulateCoursesDuration()
         .then((value) => cumulateCoursesDuration = value);
-    currentDays = await widget.tdb.fileCdays.read();
+    currentDays = await widget.tdb.getCurrentDays();
     setState(() {
       loadingFinish = true;
     });

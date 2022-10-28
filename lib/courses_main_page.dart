@@ -33,7 +33,7 @@ class _CoursesMainPageState extends State<CoursesMainPage> {
             body: Container(
                 margin: const EdgeInsets.all(10),
                 child: ListView.separated(
-                    physics: const NeverScrollableScrollPhysics(),
+                    // physics: const NeverScrollableScrollPhysics(),
                     itemBuilder: (BuildContext context, int index) {
                       return _courses(context, index);
                     },
@@ -51,7 +51,7 @@ class _CoursesMainPageState extends State<CoursesMainPage> {
                 await tdb
                     .cumulateCoursesDuration()
                     .then((value) => cumulateCoursesDuration = value);
-                String currentDays = await tdb.fileCdays.read();
+                String currentDays = await tdb.getCurrentDays();
                 showDialog(
                     context: context,
                     builder: (context) {
@@ -191,7 +191,7 @@ class _CoursesMainPageState extends State<CoursesMainPage> {
     DateTime now = DateTime.now();
     String courseName = tdb.coursesList[index];
     String currentDays = "";
-    await tdb.fileCdays.read().then((value) => currentDays = value);
+    await tdb.getCurrentDays().then((value) => currentDays = value);
     String duration;
 
     // retrieve current course info
@@ -223,7 +223,7 @@ class _CoursesMainPageState extends State<CoursesMainPage> {
       // update counter for today's courses
       coursesList[index] = now.toString();
       await tdb.updateOngoingCoursesList(coursesList);
-      await tdb.fileDBBackup.append("$courseName from ${now.toString()}");
+      tdb.appendHistory("$courseName from ${now.toString()}");
     } else {
       // current courses finished
       setState(() {
@@ -243,17 +243,17 @@ class _CoursesMainPageState extends State<CoursesMainPage> {
       dBInfo[i][index] =
           (int.parse(duration) + int.parse(dBInfo[i][index])).toString();
       await tdb.updateDB(dBInfo);
-      await tdb.fileDBBackup.append(
+      tdb.appendHistory(
           " to ${now.toString()} $courseName for about $duration minutes \n");
       // check if its the new day --- after sleep
       if (courseName == "SLEEP") {
-        await tdb.newDay(currentDays);
+        tdb.newDay(currentDays);
       }
     }
   }
 
   void initInfo() async {
-    String cds = await tdb.fileCdays.read();
+    String cds = await tdb.getCurrentDays();
     // if it's the first time open the app
     if (cds.isEmpty) {
       tdb.resetDB();

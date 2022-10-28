@@ -7,8 +7,7 @@ class FileIO {
   FileIO(String s) {
     fileName = s;
   }
-  // The path locally is below:
-  // /Users/zjendex/Library/Developer/CoreSimulator/Devices/1B97F6D9-1648-498A-B6D9-1E119D7392E0/data/Containers/Data/Application/A6B2AF56-3206-4A10-B775-04D07E6F8783/Documents
+
   Future<String> get _localPath async {
     // Documents directory
     final directory = await getApplicationDocumentsDirectory();
