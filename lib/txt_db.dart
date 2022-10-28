@@ -11,7 +11,7 @@ class TxtDB {
     "SLEEP",
     "NAP",
     "WRITE",
-    "READ",
+    "STUDY",
     "WORK",
     "WORKOUT",
     "SOCIAL",

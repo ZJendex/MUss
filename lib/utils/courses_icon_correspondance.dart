@@ -6,7 +6,7 @@ IconData? courseIcon(int index, List<String> coursesList) {
       return Icons.bedtime;
     case "WRITE":
       return Icons.edit;
-    case "READ":
+    case "STUDY":
       return Icons.menu_book;
     case "WORK":
       return Icons.people;

@@ -150,9 +150,7 @@ class _UpdateDatabaseWidgetState extends State<UpdateDatabaseWidget> {
       totalSelectCourseValue =
           totalSelectCourseValue + int.parse(day[courseIndex]);
     }
-    if (changeResult != "" &&
-        changeResult != "0" &&
-        totalSelectCourseValue + minute >= 0) {
+    if (changeResult != "" && (totalSelectCourseValue + minute >= 0)) {
       // total time should larger than zero (need alert dialog)
       db[db.length - 1][courseIndex] = changeResult;
       await widget.tdb.updateDB(db);
