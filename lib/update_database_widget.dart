@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:muss/txt_db.dart';
+import 'package:muss/backend/txt_db.dart';
 
 class UpdateDatabaseWidget extends StatefulWidget {
   final TxtDB tdb;

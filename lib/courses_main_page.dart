@@ -3,7 +3,7 @@ import 'package:muss/report_page.dart';
 import 'package:muss/update_database_widget.dart';
 import 'pkgs/pie_chart/pie_chart.dart';
 import 'package:new_gradient_app_bar/new_gradient_app_bar.dart';
-import 'txt_db.dart';
+import 'backend/txt_db.dart';
 import 'utils/courses_icon_correspondance.dart';
 
 class CoursesMainPage extends StatefulWidget {
@@ -276,7 +276,7 @@ class _CoursesMainPageState extends State<CoursesMainPage> {
       // give report
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => reportPage(tdb: tdb)),
+        MaterialPageRoute(builder: (context) => ReportPage(tdb: tdb)),
       );
     } else {
       // courses edit on current days

@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:muss/pkgs/pie_chart/pie_chart.dart';
-import 'package:muss/txt_db.dart';
+import 'package:muss/backend/txt_db.dart';
 
-class reportPage extends StatefulWidget {
+class ReportPage extends StatefulWidget {
   final TxtDB tdb;
 
-  const reportPage({Key? key, required this.tdb}) : super(key: key);
+  const ReportPage({Key? key, required this.tdb}) : super(key: key);
 
   @override
-  State<reportPage> createState() => _reportPageState();
+  State<ReportPage> createState() => _ReportPageState();
 }
 
-class _reportPageState extends State<reportPage> {
+class _ReportPageState extends State<ReportPage> {
   bool loadingFinish = false;
   Map<String, double> cumulateCoursesDuration = {};
   String currentDays = "0";
