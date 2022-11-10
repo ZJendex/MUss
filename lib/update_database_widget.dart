@@ -24,13 +24,12 @@ class _UpdateDatabaseWidgetState extends State<UpdateDatabaseWidget> {
   Widget build(BuildContext context) {
     return Container(
       height: 200,
-      color: Color.fromARGB(190, 81, 118, 147),
+      color: const Color.fromARGB(190, 81, 118, 147),
       child: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            Container(
-                child: Row(
+            Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 DropdownButton<String>(
@@ -107,7 +106,7 @@ class _UpdateDatabaseWidgetState extends State<UpdateDatabaseWidget> {
                   ),
                 )
               ],
-            )),
+            ),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 30),
               child: ElevatedButton(
