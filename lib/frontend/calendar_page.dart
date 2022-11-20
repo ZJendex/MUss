@@ -2,24 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:muss/backend/models/event_data_source.dart';
 import 'package:syncfusion_flutter_calendar/calendar.dart';
 
-import 'backend/models/course.dart';
-import 'backend/models/event.dart';
-
-void main() {
-  runApp(const MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const MaterialApp(
-      title: "appName",
-      home: CalendarPage(),
-    );
-  }
-}
+import '../backend/models/course.dart';
+import '../backend/models/event.dart';
 
 class CalendarPage extends StatefulWidget {
   const CalendarPage({super.key});
@@ -52,14 +36,14 @@ class _CalendarPageState extends State<CalendarPage> {
     final DateTime startTime =
         DateTime(today.year, today.month, today.day, 18, 0, 0);
     final DateTime endTime = startTime.add(const Duration(hours: 2));
-    events.add(Event(
-        course: Course(name: "SLEEP", task: "in bed"),
-        minutes: 20,
-        start: startTime));
-    events.add(Event(
-        course: Course(name: "SLEEP", task: "dairy"),
-        minutes: 30,
-        start: DateTime(today.year, today.month, today.day, 9, 0, 0)));
+    // events.add(Event(
+    //     course: Course(name: "SLEEP", task: "in bed"),
+    //     minutes: 20,
+    //     start: startTime));
+    // events.add(Event(
+    //     course: Course(name: "SLEEP", task: "dairy"),
+    //     minutes: 30,
+    //     start: DateTime(today.year, today.month, today.day, 9, 0, 0)));
     return events;
   }
 }

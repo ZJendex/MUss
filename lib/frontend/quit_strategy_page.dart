@@ -2,22 +2,6 @@ import 'package:flutter/material.dart';
 
 // The method retrieved from Happy Sex Millionaire written by Steven Bartlett @2021
 
-void main() {
-  runApp(const MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const MaterialApp(
-      title: "appName",
-      home: QuitStrategyPage(),
-    );
-  }
-}
-
 class Question {
   final String text;
   final String leftButtonText;

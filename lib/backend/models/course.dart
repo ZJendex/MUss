@@ -1,6 +1,6 @@
-class Course {
-  String name;
-  String task;
+import 'package:drift/drift.dart';
 
-  Course({required this.name, required this.task});
+class Course extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get name => text().named("course_name")();
 }

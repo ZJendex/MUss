@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:muss/report_page.dart';
-import 'package:muss/update_database_widget.dart';
-import 'pkgs/pie_chart/pie_chart.dart';
+import 'report_page.dart';
+import 'update_database_widget.dart';
+import '../pkgs/pie_chart/pie_chart.dart';
 import 'package:new_gradient_app_bar/new_gradient_app_bar.dart';
-import 'backend/txt_db.dart';
-import 'utils/courses_icon_correspondance.dart';
+import '../backend/txt_db.dart';
+import '../utils/courses_icon_correspondance.dart';
 
 class CoursesMainPage extends StatefulWidget {
   const CoursesMainPage({super.key});

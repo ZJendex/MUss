@@ -1,13 +1,10 @@
-import 'dart:math';
+import 'package:drift/drift.dart';
 
-import 'package:muss/backend/models/course.dart';
-
-class Event {
-  Course course;
-  int minutes;
-  DateTime start;
-  late DateTime end;
-  Event({required this.course, required this.minutes, required this.start}) {
-    end = start.add(Duration(minutes: minutes));
-  }
+class Event extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  IntColumn get course => integer().nullable()();
+  IntColumn get task => integer().nullable()();
+  IntColumn get duration => integer().nullable()();
+  DateTimeColumn get from => dateTime()();
+  DateTimeColumn get to => dateTime().nullable()();
 }
