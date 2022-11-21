@@ -16,6 +16,10 @@ IconData? courseIcon(int index, List<String> coursesList) {
       return Icons.notifications_paused;
     case "SOCIAL":
       return Icons.emoji_food_beverage;
+    case "看手机":
+      return Icons.phone_android;
+    case "出门运动":
+      return Icons.run_circle_outlined;
     default:
       return Icons.add;
   }

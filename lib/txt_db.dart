@@ -10,13 +10,8 @@ class TxtDB {
   final FileIO _fileDBBackup = FileIO("history.txt"); // backup txt
   final FileIO _fileConst = FileIO("const.txt"); // utils save
   final List<String> coursesList = [
-    "SLEEP",
-    "NAP",
-    "WRITE",
-    "STUDY",
-    "WORK",
-    "WORKOUT",
-    "SOCIAL",
+    "看手机",
+    "出门运动",
   ];
   final String _oneDayCoursesBaseData = "0|0|0|0|0|0|0";
 
@@ -129,12 +124,18 @@ class TxtDB {
     }
     // fill cumulateCoursesDuration
     double cumulateAll = 0;
+    String nowTime = await _fileConst.read();
+    int days =
+        DateTimeRange(start: DateTime.parse(nowTime), end: DateTime.now())
+            .duration
+            .inDays;
     for (int i = 0; i < coursesList.length; i++) {
-      cumulateCoursesDuration[coursesList[i]] = cCD[i];
+      cumulateCoursesDuration[coursesList[i]] = cCD[i] / (days + 1);
       cumulateAll = cumulateAll + cCD[i];
     }
-    cumulateCoursesDuration["OTHERS"] =
-        totalDuration - cumulateAll >= 0 ? totalDuration - cumulateAll : 0;
+
+    // cumulateCoursesDuration["OTHERS"] =
+    //     totalDuration - cumulateAll >= 0 ? totalDuration - cumulateAll : 0;
     return cumulateCoursesDuration;
   }
 }

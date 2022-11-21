@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:muss/report_page.dart';
 import 'package:muss/update_database_widget.dart';
@@ -5,6 +7,7 @@ import 'pkgs/pie_chart/pie_chart.dart';
 import 'package:new_gradient_app_bar/new_gradient_app_bar.dart';
 import 'txt_db.dart';
 import 'utils/courses_icon_correspondance.dart';
+import 'package:audioplayers/audioplayers.dart';
 
 class CoursesMainPage extends StatefulWidget {
   const CoursesMainPage({super.key});
@@ -14,10 +17,13 @@ class CoursesMainPage extends StatefulWidget {
 }
 
 class _CoursesMainPageState extends State<CoursesMainPage> {
-  String appName = "MUss";
+  final player = AudioPlayer();
+  String appName = "奶奶做事用时记录";
   TxtDB tdb = TxtDB();
   List<bool> courseOngoing = List.filled(10, false); // maxium 10 courses
   bool loadingFinish = false;
+  Timer? timer;
+  bool isOngoing = false;
 
   @override
   void initState() {
@@ -59,7 +65,7 @@ class _CoursesMainPageState extends State<CoursesMainPage> {
                         padding: const EdgeInsets.all(50),
                         child: PieChart(
                             chartLegendSpacing: 70,
-                            centerText: "DAY $currentDays",
+                            centerText: "每日平均用时",
                             centerTextStyle: const TextStyle(
                                 color: Colors.white70,
                                 fontWeight: FontWeight.bold,
@@ -163,16 +169,16 @@ class _CoursesMainPageState extends State<CoursesMainPage> {
               width: 10,
             ),
             Container(
-              height: 80,
+              height: 200,
               padding: const EdgeInsets.only(right: 20),
               alignment: Alignment.center,
               child: Text(
                 tdb.coursesList[index],
                 style: const TextStyle(
-                  letterSpacing: 7,
-                  fontWeight: FontWeight.w700,
-                  fontStyle: FontStyle.italic,
-                ),
+                    letterSpacing: 7,
+                    fontWeight: FontWeight.w700,
+                    fontStyle: FontStyle.italic,
+                    fontSize: 30),
               ),
             ),
             Icon(
@@ -180,6 +186,7 @@ class _CoursesMainPageState extends State<CoursesMainPage> {
               color: courseOngoing[index]
                   ? const Color.fromARGB(255, 217, 87, 74)
                   : Colors.black,
+              size: 60,
             ),
           ],
         ));
@@ -215,6 +222,11 @@ class _CoursesMainPageState extends State<CoursesMainPage> {
       // do nothing if ongoing course conflict happened
     } else if (coursesList[index] == '0') {
       // new courses started
+      timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+        timer.cancel();
+        player.setVolume(1);
+        player.play(AssetSource('audio/springtide.mp3'));
+      });
       setState(() {
         courseOngoing[index] = true;
       });
@@ -224,6 +236,8 @@ class _CoursesMainPageState extends State<CoursesMainPage> {
       tdb.appendHistory("$courseName from ${now.toString()}");
     } else {
       // current courses finished
+      timer == null ? {} : {timer!.cancel()};
+      player.stop();
       setState(() {
         courseOngoing[index] = false;
       });
@@ -306,7 +320,7 @@ class _CoursesMainPageState extends State<CoursesMainPage> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
                   const Text(
-                    "Confirm to wipe out the history",
+                    "要清除所有历史数据吗？",
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 18,
@@ -329,7 +343,7 @@ class _CoursesMainPageState extends State<CoursesMainPage> {
                                     RoundedRectangleBorder(
                                         borderRadius:
                                             BorderRadius.circular(40)))),
-                            child: const Text('Cancel'),
+                            child: const Text('取消'),
                             onPressed: () async {
                               Navigator.pop(context);
                             },
@@ -344,7 +358,7 @@ class _CoursesMainPageState extends State<CoursesMainPage> {
                                     RoundedRectangleBorder(
                                         borderRadius:
                                             BorderRadius.circular(40)))),
-                            child: const Text('Confirm'),
+                            child: const Text('清除'),
                             onPressed: () async {
                               tdb.resetDB();
                               Navigator.pop(context);
