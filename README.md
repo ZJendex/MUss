@@ -1,16 +1,10 @@
 # muss
 
-A new Flutter project.
+An App that could help to control your time spend
 
-## Getting Started
-
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Features
+1. Time record
+2. Time alarm
+3. Reset
+4. Show average time spending data in pie-chart
+5. Update time spent
