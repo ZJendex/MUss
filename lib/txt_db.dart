@@ -8,7 +8,10 @@ class TxtDB {
   final FileIO _fileDBInDays =
       FileIO("database.txt"); // main database through all the days
   final FileIO _fileDBBackup = FileIO("history.txt"); // backup txt
-  final FileIO _fileConst = FileIO("const.txt"); // utils save
+  final FileIO _fileConst = FileIO("const.txt"); // start date
+  final FileIO _fileCountDown =
+      FileIO("count_down.txt"); //save count down alarm time
+
   final List<String> coursesList = [
     "看手机",
     "出门运动",
@@ -29,6 +32,16 @@ class TxtDB {
     _fileDBBackup.write("");
     // save the starting datetime
     _fileConst.write(DateTime.now().toString());
+    _fileCountDown.write("40");
+  }
+
+  Future<int?> getCountDown() async {
+    String c = await _fileCountDown.read();
+    return int.tryParse(c);
+  }
+
+  updateCountDown(int c) async {
+    await _fileCountDown.write("$c");
   }
 
   // update current courses status

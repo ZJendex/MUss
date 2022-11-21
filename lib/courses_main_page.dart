@@ -2,7 +2,9 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:muss/report_page.dart';
+import 'package:muss/update_countdown_widget.dart';
 import 'package:muss/update_database_widget.dart';
+import 'no_animation_material_page_route.dart';
 import 'pkgs/pie_chart/pie_chart.dart';
 import 'package:new_gradient_app_bar/new_gradient_app_bar.dart';
 import 'txt_db.dart';
@@ -24,6 +26,7 @@ class _CoursesMainPageState extends State<CoursesMainPage> {
   bool loadingFinish = false;
   Timer? timer;
   bool isOngoing = false;
+  late int countDown;
 
   @override
   void initState() {
@@ -107,12 +110,12 @@ class _CoursesMainPageState extends State<CoursesMainPage> {
             bottomNavigationBar: BottomNavigationBar(
               items: const <BottomNavigationBarItem>[
                 BottomNavigationBarItem(
-                  icon: Icon(Icons.data_thresholding_outlined),
-                  label: 'Report',
+                  icon: Icon(Icons.alarm),
+                  label: '改变提醒时间',
                 ),
                 BottomNavigationBarItem(
-                  icon: Icon(Icons.add_box_outlined),
-                  label: 'Edit',
+                  icon: Icon(Icons.timelapse),
+                  label: '更新事件时间',
                 ),
               ],
               selectedItemColor: Colors.black,
@@ -148,7 +151,10 @@ class _CoursesMainPageState extends State<CoursesMainPage> {
               child: Padding(
                   padding: const EdgeInsets.only(right: 20.0),
                   child: GestureDetector(
-                    onTap: () => alertOnResetDB(),
+                    onTap: () async {
+                      alertOnResetDB();
+                      setState(() {});
+                    },
                     child: const Icon(
                       Icons.restart_alt,
                     ),
@@ -222,10 +228,23 @@ class _CoursesMainPageState extends State<CoursesMainPage> {
       // do nothing if ongoing course conflict happened
     } else if (coursesList[index] == '0') {
       // new courses started
-      timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      timer = Timer.periodic(Duration(minutes: countDown), (timer) {
         timer.cancel();
         player.setVolume(1);
         player.play(AssetSource('audio/springtide.mp3'));
+        ScaffoldMessenger.of(context).showMaterialBanner(
+          MaterialBanner(
+            content: Text("已经过了$countDown分钟了, 需要休息啦"),
+            actions: [
+              TextButton(
+                  onPressed: (() {
+                    ScaffoldMessenger.of(context).hideCurrentMaterialBanner();
+                    player.stop();
+                  }),
+                  child: const Text("知道了"))
+            ],
+          ),
+        );
       });
       setState(() {
         courseOngoing[index] = true;
@@ -265,6 +284,7 @@ class _CoursesMainPageState extends State<CoursesMainPage> {
   }
 
   void initInfo() async {
+    countDown = await tdb.getCountDown() ?? 40;
     String cds = await tdb.getCurrentDays();
     // if it's the first time open the app
     if (cds.isEmpty) {
@@ -285,16 +305,27 @@ class _CoursesMainPageState extends State<CoursesMainPage> {
     });
   }
 
-  void _onItemTapped(int index) {
+  void _onItemTapped(int index) async {
     if (index == 0) {
-      // give report
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => reportPage(tdb: tdb)),
+      // change coutDown
+      await showModalBottomSheet<void>(
+        context: context,
+        builder: (BuildContext context) {
+          return UpdateCountdownWidget(tdb: tdb);
+        },
       );
+      // Refresh the main page with initState triggered
+      Navigator.pop(context);
+      Navigator.push(
+          context,
+          NoAnimationMaterialPageRoute(
+              builder: ((context) => MaterialApp(
+                    title: appName,
+                    home: CoursesMainPage(),
+                  ))));
     } else {
       // courses edit on current days
-      showModalBottomSheet<void>(
+      await showModalBottomSheet<void>(
         context: context,
         builder: (BuildContext context) {
           return UpdateDatabaseWidget(tdb: tdb);
@@ -362,6 +393,15 @@ class _CoursesMainPageState extends State<CoursesMainPage> {
                             onPressed: () async {
                               tdb.resetDB();
                               Navigator.pop(context);
+                              // Refresh the main page with initState triggered
+                              Navigator.pop(context);
+                              Navigator.push(
+                                  context,
+                                  NoAnimationMaterialPageRoute(
+                                      builder: ((context) => MaterialApp(
+                                            title: appName,
+                                            home: CoursesMainPage(),
+                                          ))));
                             },
                           ),
                         ],
