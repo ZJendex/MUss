@@ -289,7 +289,7 @@ class _CoursesMainPageState extends State<CoursesMainPage> {
     return Timer.periodic(Duration(seconds: countDown), (timer) {
       timer.cancel();
       player.setVolume(1);
-      player.play(AssetSource('audio/springtide.mp3'));
+      player.play(AssetSource('audio/mixkit-goals-are-ahead-146.mp3'));
       ScaffoldMessenger.of(context).showMaterialBanner(
         MaterialBanner(
           content: Text("已经过了$countDown分钟了, 需要休息啦"),
