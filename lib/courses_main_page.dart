@@ -10,8 +10,6 @@ import 'txt_db.dart';
 import 'utils/courses_icon_correspondance.dart';
 import 'package:audioplayers/audioplayers.dart';
 
-final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-
 class CoursesMainPage extends StatefulWidget {
   const CoursesMainPage({super.key});
 
@@ -26,8 +24,12 @@ class _CoursesMainPageState extends State<CoursesMainPage> {
   List<bool> courseOngoing = List.filled(10, false); // maxium 10 courses
   bool loadingFinish = false;
   Timer? timer;
+  Timer? timerV;
+
   bool isOngoing = false;
   late List<int> countDowns;
+  String ongoingTime = "00:00:00";
+  int ongoingTimeInSeconds = 0;
 
   @override
   void initState() {
@@ -39,18 +41,17 @@ class _CoursesMainPageState extends State<CoursesMainPage> {
   Widget build(BuildContext context) {
     return loadingFinish
         ? Scaffold(
-            key: _scaffoldKey,
             appBar: _appBarWidget(),
             body: Container(
                 margin: const EdgeInsets.all(10),
                 child: ListView.separated(
-                    // physics: const NeverScrollableScrollPhysics(),
+                    physics: const NeverScrollableScrollPhysics(),
                     itemBuilder: (BuildContext context, int index) {
                       return _courses(context, index);
                     },
                     separatorBuilder: (BuildContext context, int index) {
                       return Container(
-                        height: 8,
+                        height: 50,
                       );
                     },
                     itemCount: tdb.coursesList.length)),
@@ -170,35 +171,58 @@ class _CoursesMainPageState extends State<CoursesMainPage> {
         onTap: () async {
           courseClicked(context, index);
         },
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
+        child: Column(
           children: [
-            const SizedBox(
-              width: 10,
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                const SizedBox(
+                  width: 10,
+                ),
+                Container(
+                  height: 100,
+                  padding: const EdgeInsets.only(right: 20),
+                  alignment: Alignment.center,
+                  child: Text(
+                    tdb.coursesList[index],
+                    style: const TextStyle(
+                        letterSpacing: 7,
+                        fontWeight: FontWeight.w700,
+                        fontStyle: FontStyle.italic,
+                        fontSize: 30),
+                  ),
+                ),
+                Icon(
+                  courseIcon(index, tdb.coursesList),
+                  color: courseOngoing[index]
+                      ? const Color.fromARGB(255, 217, 87, 74)
+                      : Colors.black,
+                  size: 60,
+                ),
+              ],
             ),
-            Container(
-              height: 150,
-              padding: const EdgeInsets.only(right: 20),
-              alignment: Alignment.center,
+            Visibility(
+              visible: courseOngoing[index],
               child: Text(
-                tdb.coursesList[index],
-                style: const TextStyle(
-                    letterSpacing: 7,
-                    fontWeight: FontWeight.w700,
-                    fontStyle: FontStyle.italic,
-                    fontSize: 30),
+                "${ongoingTime}",
+                style: TextStyle(fontSize: 18),
               ),
-            ),
-            Icon(
-              courseIcon(index, tdb.coursesList),
-              color: courseOngoing[index]
-                  ? const Color.fromARGB(255, 217, 87, 74)
-                  : Colors.black,
-              size: 60,
-            ),
+            )
           ],
         ));
+  }
+
+  timeSecToHours({required int timeInSecond}) {
+    int sec = timeInSecond % 60;
+    int timeInMin = (timeInSecond / 60).floor();
+    int min = timeInMin % 60;
+    int timeInHour = (timeInMin / 60).floor();
+    String hour =
+        timeInHour.toString().length <= 1 ? "0$timeInHour" : "$timeInHour";
+    String minute = min.toString().length <= 1 ? "0$min" : "$min";
+    String second = sec.toString().length <= 1 ? "0$sec" : "$sec";
+    return "$hour:$minute:$second";
   }
 
   void courseClicked(BuildContext context, int index) async {
@@ -250,7 +274,15 @@ class _CoursesMainPageState extends State<CoursesMainPage> {
           ],
         ),
       );
+      // alarm timer
       timer = setTimer(context, countDowns[index]);
+      // visualized timer
+      timerV = Timer.periodic(const Duration(seconds: 1), ((timer) {
+        ongoingTimeInSeconds++;
+        setState(() {
+          ongoingTime = timeSecToHours(timeInSecond: ongoingTimeInSeconds);
+        });
+      }));
       setState(() {
         courseOngoing[index] = true;
       });
@@ -261,9 +293,12 @@ class _CoursesMainPageState extends State<CoursesMainPage> {
     } else {
       // current courses finished
       timer == null ? {} : {timer!.cancel()};
+      timerV == null ? {} : {timerV!.cancel()};
+      ongoingTimeInSeconds = 0;
       player.stop();
       setState(() {
         courseOngoing[index] = false;
+        ongoingTime = "00:00:00";
       });
       // get the duration and clean the corresponding counter
       duration =

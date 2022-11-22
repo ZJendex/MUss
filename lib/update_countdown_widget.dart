@@ -32,43 +32,42 @@ class _UpdateCountdownWidgetState extends State<UpdateCountdownWidget> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
+                  DropdownButton<String>(
+                    value: _courseEditSelectedCourse,
+                    alignment: AlignmentDirectional.centerEnd,
+                    underline: const DropdownButtonHideUnderline(
+                      child: SizedBox.shrink(),
+                    ),
+                    items: widget.tdb.coursesList.map((String items) {
+                      return DropdownMenuItem(
+                        value: items,
+                        child: Text(
+                          items,
+                          style: const TextStyle(
+                            letterSpacing: 3,
+                            fontSize: 18,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                    onChanged: (val) async {
+                      int index = 0;
+                      for (var item in widget.tdb.coursesList) {
+                        if (item == val) break;
+                        index++;
+                      }
+                      List<int> countdowns = await widget.tdb.getCountDowns();
+                      setState(() {
+                        _courseEditSelectedCourse = val ?? "";
+                        _minuteChange = countdowns[index];
+                      });
+                    },
+                  ),
                   Container(
                       child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
-                      DropdownButton<String>(
-                        value: _courseEditSelectedCourse,
-                        alignment: AlignmentDirectional.centerEnd,
-                        underline: const DropdownButtonHideUnderline(
-                          child: SizedBox.shrink(),
-                        ),
-                        items: widget.tdb.coursesList.map((String items) {
-                          return DropdownMenuItem(
-                            value: items,
-                            child: Text(
-                              items,
-                              style: const TextStyle(
-                                letterSpacing: 3,
-                                fontSize: 18,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                          );
-                        }).toList(),
-                        onChanged: (val) async {
-                          int index = 0;
-                          for (var item in widget.tdb.coursesList) {
-                            if (item == val) break;
-                            index++;
-                          }
-                          List<int> countdowns =
-                              await widget.tdb.getCountDowns();
-                          setState(() {
-                            _courseEditSelectedCourse = val ?? "";
-                            _minuteChange = countdowns[index];
-                          });
-                        },
-                      ),
                       Container(
                         padding: const EdgeInsets.only(left: 10),
                         child: Row(
