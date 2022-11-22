@@ -13,10 +13,12 @@ class UpdateCountdownWidget extends StatefulWidget {
 class _UpdateCountdownWidgetState extends State<UpdateCountdownWidget> {
   late int _minuteChange;
   bool finishInit = false;
+  String _courseEditSelectedCourse = "";
 
   @override
   void initState() {
-    getCountdownMinute();
+    initInfo();
+
     super.initState();
   }
 
@@ -34,6 +36,39 @@ class _UpdateCountdownWidgetState extends State<UpdateCountdownWidget> {
                       child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
+                      DropdownButton<String>(
+                        value: _courseEditSelectedCourse,
+                        alignment: AlignmentDirectional.centerEnd,
+                        underline: const DropdownButtonHideUnderline(
+                          child: SizedBox.shrink(),
+                        ),
+                        items: widget.tdb.coursesList.map((String items) {
+                          return DropdownMenuItem(
+                            value: items,
+                            child: Text(
+                              items,
+                              style: const TextStyle(
+                                letterSpacing: 3,
+                                fontSize: 18,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          );
+                        }).toList(),
+                        onChanged: (val) async {
+                          int index = 0;
+                          for (var item in widget.tdb.coursesList) {
+                            if (item == val) break;
+                            index++;
+                          }
+                          List<int> countdowns =
+                              await widget.tdb.getCountDowns();
+                          setState(() {
+                            _courseEditSelectedCourse = val ?? "";
+                            _minuteChange = countdowns[index];
+                          });
+                        },
+                      ),
                       Container(
                         padding: const EdgeInsets.only(left: 10),
                         child: Row(
@@ -99,11 +134,12 @@ class _UpdateCountdownWidgetState extends State<UpdateCountdownWidget> {
                           shape: MaterialStateProperty.all(
                               RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(40)))),
-                      child: const Text('Update'),
+                      child: const Text('更新'),
                       onPressed: () async {
                         Navigator.pop(context);
                         // if save button causing a lag, modify this method
-                        await updateDB(_minuteChange);
+                        await updateCountdown(
+                            _minuteChange, _courseEditSelectedCourse);
                       },
                     ),
                   )
@@ -114,12 +150,21 @@ class _UpdateCountdownWidgetState extends State<UpdateCountdownWidget> {
         : Container();
   }
 
-  updateDB(int minute) async {
-    await widget.tdb.updateCountDown(minute);
+  updateCountdown(int minute, String selectCourse) async {
+    int index = 0;
+    for (var item in widget.tdb.coursesList) {
+      if (item == selectCourse) break;
+      index++;
+    }
+    List<int> tmp = await widget.tdb.getCountDowns();
+    tmp[index] = minute;
+    await widget.tdb.updateCountDowns(tmp);
   }
 
-  void getCountdownMinute() async {
-    _minuteChange = (await widget.tdb.getCountDown())!;
+  void initInfo() async {
+    _courseEditSelectedCourse = widget.tdb.coursesList[0];
+    var minutesChange = await widget.tdb.getCountDowns();
+    _minuteChange = minutesChange[0];
     setState(() {
       finishInit = true;
     });

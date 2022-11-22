@@ -14,6 +14,7 @@ class TxtDB {
 
   final List<String> coursesList = [
     "看手机",
+    "晒太阳",
     "出门运动",
   ];
   final String _oneDayCoursesBaseData = "0|0|0|0|0|0|0";
@@ -32,16 +33,26 @@ class TxtDB {
     _fileDBBackup.write("");
     // save the starting datetime
     _fileConst.write(DateTime.now().toString());
-    _fileCountDown.write("40");
+    _fileCountDown.write("40|30|20|0|0|0|");
   }
 
-  Future<int?> getCountDown() async {
-    String c = await _fileCountDown.read();
-    return int.tryParse(c);
+  Future<List<int>> getCountDowns() async {
+    List<int> countDowns = [];
+    String value = await _fileCountDown.read();
+    for (var element in value.split("|").toList()) {
+      if (int.tryParse(element) != null) {
+        countDowns.add(int.parse(element));
+      }
+    }
+
+    return countDowns;
   }
 
-  updateCountDown(int c) async {
-    await _fileCountDown.write("$c");
+  updateCountDowns(List<int> c) async {
+    await _fileCountDown.clear();
+    for (var cd in c) {
+      await _fileCountDown.append("$cd|");
+    }
   }
 
   // update current courses status

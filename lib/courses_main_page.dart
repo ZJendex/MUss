@@ -29,7 +29,7 @@ class _CoursesMainPageState extends State<CoursesMainPage> {
   bool loadingFinish = false;
   Timer? timer;
   bool isOngoing = false;
-  late int countDown;
+  late List<int> countDowns;
 
   @override
   void initState() {
@@ -181,7 +181,7 @@ class _CoursesMainPageState extends State<CoursesMainPage> {
               width: 10,
             ),
             Container(
-              height: 200,
+              height: 150,
               padding: const EdgeInsets.only(right: 20),
               alignment: Alignment.center,
               child: Text(
@@ -234,24 +234,20 @@ class _CoursesMainPageState extends State<CoursesMainPage> {
       // do nothing if ongoing course conflict happened
     } else if (coursesList[index] == '0') {
       // new courses started
-      timer = Timer.periodic(Duration(minutes: countDown), (timer) {
-        timer.cancel();
-        player.setVolume(1);
-        player.play(AssetSource('audio/springtide.mp3'));
-        ScaffoldMessenger.of(context).showMaterialBanner(
-          MaterialBanner(
-            content: Text("已经过了$countDown分钟了, 需要休息啦"),
-            actions: [
-              TextButton(
-                  onPressed: (() {
-                    ScaffoldMessenger.of(context).hideCurrentMaterialBanner();
-                    player.stop();
-                  }),
-                  child: const Text("知道了"))
-            ],
-          ),
-        );
-      });
+      ScaffoldMessenger.of(context).showMaterialBanner(
+        MaterialBanner(
+          content: Text("${countDowns[index]}分钟开始计时"),
+          actions: [
+            TextButton(
+                onPressed: (() {
+                  ScaffoldMessenger.of(context).hideCurrentMaterialBanner();
+                  player.stop();
+                }),
+                child: const Text("知道了"))
+          ],
+        ),
+      );
+      timer = setTimer(context, countDowns[index]);
       setState(() {
         courseOngoing[index] = true;
       });
@@ -289,8 +285,29 @@ class _CoursesMainPageState extends State<CoursesMainPage> {
     }
   }
 
+  Timer setTimer(BuildContext context, int countDown) {
+    return Timer.periodic(Duration(seconds: countDown), (timer) {
+      timer.cancel();
+      player.setVolume(1);
+      player.play(AssetSource('audio/springtide.mp3'));
+      ScaffoldMessenger.of(context).showMaterialBanner(
+        MaterialBanner(
+          content: Text("已经过了$countDown分钟了, 需要休息啦"),
+          actions: [
+            TextButton(
+                onPressed: (() {
+                  ScaffoldMessenger.of(context).hideCurrentMaterialBanner();
+                  player.stop();
+                }),
+                child: const Text("知道了"))
+          ],
+        ),
+      );
+    });
+  }
+
   void initInfo() async {
-    countDown = await tdb.getCountDown() ?? 40;
+    countDowns = await tdb.getCountDowns();
     String cds = await tdb.getCurrentDays();
     // if it's the first time open the app
     if (cds.isEmpty) {

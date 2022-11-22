@@ -58,10 +58,10 @@ List<Color> brownessColorList = const [
 ];
 List<Color> pinknessColorList = const [
   Color.fromARGB(255, 0, 78, 162), // SLEEP
-  Color.fromARGB(255, 0, 113, 171), // NAP
-  Color.fromARGB(255, 156, 100, 167), // WRITE
-  Color.fromARGB(255, 227, 198, 207), // READ
   Color.fromARGB(255, 199, 45, 117), // WORK
+  Color.fromARGB(255, 156, 100, 167), // WRITE
+  Color.fromARGB(255, 0, 113, 171), // NAP
+  Color.fromARGB(255, 227, 198, 207), // READ
   Color.fromARGB(255, 92, 16, 40), // WORKOUT
   Color.fromARGB(255, 78, 45, 93), // SOCIAL
   Color.fromARGB(255, 101, 87, 86), // OTHERS
