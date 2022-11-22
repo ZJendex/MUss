@@ -27,7 +27,7 @@ class _UpdateCountdownWidgetState extends State<UpdateCountdownWidget> {
     return finishInit
         ? Container(
             height: 200,
-            color: Color.fromARGB(190, 81, 118, 147),
+            color: const Color.fromARGB(190, 81, 118, 147),
             child: Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,

@@ -20,6 +20,8 @@ IconData? courseIcon(int index, List<String> coursesList) {
       return Icons.phone_android;
     case "出门运动":
       return Icons.run_circle_outlined;
+    case "晒太阳":
+      return Icons.sunny;
     default:
       return Icons.add;
   }

@@ -24,7 +24,7 @@ class _UpdateDatabaseWidgetState extends State<UpdateDatabaseWidget> {
   Widget build(BuildContext context) {
     return Container(
       height: 200,
-      color: Color.fromARGB(190, 81, 118, 147),
+      color: const Color.fromARGB(190, 81, 118, 147),
       child: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,

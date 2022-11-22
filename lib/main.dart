@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'courses_main_page.dart';
 
 const String appName = "MUss";
-final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
 void main() {
   runApp(RestartWidget(child: const MyApp()));

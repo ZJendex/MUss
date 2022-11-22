@@ -2,10 +2,8 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:muss/main.dart';
-import 'package:muss/report_page.dart';
 import 'package:muss/update_countdown_widget.dart';
 import 'package:muss/update_database_widget.dart';
-import 'no_animation_material_page_route.dart';
 import 'pkgs/pie_chart/pie_chart.dart';
 import 'package:new_gradient_app_bar/new_gradient_app_bar.dart';
 import 'txt_db.dart';
@@ -64,7 +62,6 @@ class _CoursesMainPageState extends State<CoursesMainPage> {
                 await tdb
                     .cumulateCoursesDuration()
                     .then((value) => cumulateCoursesDuration = value);
-                String currentDays = await tdb.getCurrentDays();
                 showDialog(
                     context: context,
                     builder: (context) {
@@ -236,7 +233,13 @@ class _CoursesMainPageState extends State<CoursesMainPage> {
       // new courses started
       ScaffoldMessenger.of(context).showMaterialBanner(
         MaterialBanner(
-          content: Text("${countDowns[index]}分钟开始计时"),
+          onVisible: () {
+            Timer.periodic(const Duration(seconds: 2), (timer) {
+              timer.cancel();
+              ScaffoldMessenger.of(context).hideCurrentMaterialBanner();
+            });
+          },
+          content: Text("${countDowns[index]}分钟计时开始"),
           actions: [
             TextButton(
                 onPressed: (() {
@@ -286,7 +289,7 @@ class _CoursesMainPageState extends State<CoursesMainPage> {
   }
 
   Timer setTimer(BuildContext context, int countDown) {
-    return Timer.periodic(Duration(seconds: countDown), (timer) {
+    return Timer.periodic(Duration(minutes: countDown), (timer) {
       timer.cancel();
       player.setVolume(1);
       player.play(AssetSource('audio/mixkit-goals-are-ahead-146.mp3'));
@@ -351,6 +354,12 @@ class _CoursesMainPageState extends State<CoursesMainPage> {
       } else {
         ScaffoldMessenger.of(context).showMaterialBanner(
           MaterialBanner(
+            onVisible: () {
+              Timer.periodic(const Duration(seconds: 2), (timer) {
+                timer.cancel();
+                ScaffoldMessenger.of(context).hideCurrentMaterialBanner();
+              });
+            },
             content: const Text("请先停止当前进行的事件"),
             actions: [
               TextButton(
