@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:muss/main.dart';
 import 'package:muss/report_page.dart';
 import 'package:muss/update_countdown_widget.dart';
 import 'package:muss/update_database_widget.dart';
@@ -10,6 +11,8 @@ import 'package:new_gradient_app_bar/new_gradient_app_bar.dart';
 import 'txt_db.dart';
 import 'utils/courses_icon_correspondance.dart';
 import 'package:audioplayers/audioplayers.dart';
+
+final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
 class CoursesMainPage extends StatefulWidget {
   const CoursesMainPage({super.key});
@@ -38,6 +41,7 @@ class _CoursesMainPageState extends State<CoursesMainPage> {
   Widget build(BuildContext context) {
     return loadingFinish
         ? Scaffold(
+            key: _scaffoldKey,
             appBar: _appBarWidget(),
             body: Container(
                 margin: const EdgeInsets.all(10),
@@ -166,7 +170,9 @@ class _CoursesMainPageState extends State<CoursesMainPage> {
     // 点击监视器
     return GestureDetector(
         behavior: HitTestBehavior.translucent,
-        onTap: () => courseClicked(context, index),
+        onTap: () async {
+          courseClicked(context, index);
+        },
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
@@ -307,22 +313,39 @@ class _CoursesMainPageState extends State<CoursesMainPage> {
 
   void _onItemTapped(int index) async {
     if (index == 0) {
-      // change coutDown
-      await showModalBottomSheet<void>(
-        context: context,
-        builder: (BuildContext context) {
-          return UpdateCountdownWidget(tdb: tdb);
-        },
-      );
-      // Refresh the main page with initState triggered
-      Navigator.pop(context);
-      Navigator.push(
-          context,
-          NoAnimationMaterialPageRoute(
-              builder: ((context) => MaterialApp(
-                    title: appName,
-                    home: CoursesMainPage(),
-                  ))));
+      List<String> coursesList = [];
+      await tdb.getCoursesList().then((value) => coursesList = value);
+      bool coursesOngoingStatus = false;
+      coursesList.forEach((element) {
+        if (element != '0') {
+          coursesOngoingStatus = true;
+        }
+      });
+      if (!coursesOngoingStatus) {
+        // change coutDown
+        await showModalBottomSheet<void>(
+          context: context,
+          builder: (BuildContext context) {
+            return UpdateCountdownWidget(tdb: tdb);
+          },
+        );
+        // Refresh the main page with initState triggered
+        RestartWidget.restartApp(context);
+      } else {
+        ScaffoldMessenger.of(context).showMaterialBanner(
+          MaterialBanner(
+            content: const Text("请先停止当前进行的事件"),
+            actions: [
+              TextButton(
+                  onPressed: (() {
+                    ScaffoldMessenger.of(context).hideCurrentMaterialBanner();
+                    player.stop();
+                  }),
+                  child: const Text("知道了"))
+            ],
+          ),
+        );
+      }
     } else {
       // courses edit on current days
       await showModalBottomSheet<void>(
@@ -394,14 +417,7 @@ class _CoursesMainPageState extends State<CoursesMainPage> {
                               tdb.resetDB();
                               Navigator.pop(context);
                               // Refresh the main page with initState triggered
-                              Navigator.pop(context);
-                              Navigator.push(
-                                  context,
-                                  NoAnimationMaterialPageRoute(
-                                      builder: ((context) => MaterialApp(
-                                            title: appName,
-                                            home: CoursesMainPage(),
-                                          ))));
+                              RestartWidget.restartApp(context);
                             },
                           ),
                         ],

@@ -59,7 +59,7 @@ class _UpdateCountdownWidgetState extends State<UpdateCountdownWidget> {
                                   onPressed: () {
                                     setState(
                                       () {
-                                        _minuteChange = _minuteChange + 1;
+                                        _minuteChange = _minuteChange + 5;
                                       },
                                     );
                                   },
@@ -75,7 +75,7 @@ class _UpdateCountdownWidgetState extends State<UpdateCountdownWidget> {
                                     setState(
                                       () {
                                         if (_minuteChange > 0) {
-                                          _minuteChange = _minuteChange - 1;
+                                          _minuteChange = _minuteChange - 5;
                                         }
                                       },
                                     );
