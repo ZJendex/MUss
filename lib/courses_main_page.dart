@@ -23,18 +23,18 @@ class _CoursesMainPageState extends State<CoursesMainPage> {
   TxtDB tdb = TxtDB();
   List<bool> courseOngoing = List.filled(10, false); // maxium 10 courses
   bool loadingFinish = false;
-  Timer? timer;
   Timer? timerV;
 
-  bool isOngoing = false;
+  String previousOngoingTime = "";
   late List<int> countDowns;
   String ongoingTime = "00:00:00";
-  int ongoingTimeInSeconds = 0;
+  ValueNotifier ongoingTimeInSeconds = ValueNotifier(0);
+  bool knowingPlayed = false;
 
   @override
   void initState() {
-    initInfo();
     super.initState();
+    initInfo();
   }
 
   @override
@@ -274,13 +274,13 @@ class _CoursesMainPageState extends State<CoursesMainPage> {
           ],
         ),
       );
-      // alarm timer
-      timer = setTimer(context, countDowns[index]);
+
       // visualized timer
       timerV = Timer.periodic(const Duration(seconds: 1), ((timer) {
-        ongoingTimeInSeconds++;
+        ongoingTimeInSeconds.value++;
         setState(() {
-          ongoingTime = timeSecToHours(timeInSecond: ongoingTimeInSeconds);
+          ongoingTime =
+              timeSecToHours(timeInSecond: ongoingTimeInSeconds.value);
         });
       }));
       setState(() {
@@ -292,9 +292,9 @@ class _CoursesMainPageState extends State<CoursesMainPage> {
       tdb.appendHistory("$courseName from ${now.toString()}");
     } else {
       // current courses finished
-      timer == null ? {} : {timer!.cancel()};
+      knowingPlayed = false;
       timerV == null ? {} : {timerV!.cancel()};
-      ongoingTimeInSeconds = 0;
+      ongoingTimeInSeconds.value = 0;
       player.stop();
       setState(() {
         courseOngoing[index] = false;
@@ -323,27 +323,6 @@ class _CoursesMainPageState extends State<CoursesMainPage> {
     }
   }
 
-  Timer setTimer(BuildContext context, int countDown) {
-    return Timer.periodic(Duration(minutes: countDown), (timer) {
-      timer.cancel();
-      player.setVolume(1);
-      player.play(AssetSource('audio/mixkit-goals-are-ahead-146.mp3'));
-      ScaffoldMessenger.of(context).showMaterialBanner(
-        MaterialBanner(
-          content: Text("已经过了$countDown分钟了, 需要休息啦"),
-          actions: [
-            TextButton(
-                onPressed: (() {
-                  ScaffoldMessenger.of(context).hideCurrentMaterialBanner();
-                  player.stop();
-                }),
-                child: const Text("知道了"))
-          ],
-        ),
-      );
-    });
-  }
-
   void initInfo() async {
     countDowns = await tdb.getCountDowns();
     String cds = await tdb.getCurrentDays();
@@ -356,12 +335,61 @@ class _CoursesMainPageState extends State<CoursesMainPage> {
     await tdb.getCoursesList().then((value) => coursesList = value);
     for (int i = 0; i < coursesList.length; i++) {
       if (coursesList[i] != "0") {
+        previousOngoingTime = coursesList[i];
         courseOngoing[i] = true;
       } else {
         courseOngoing[i] = false;
       }
     }
+
+    // if app closed when ongoing courses still going, get back the countdown in real time
+    if (previousOngoingTime != "") {
+      print(previousOngoingTime);
+      ongoingTimeInSeconds.value = DateTimeRange(
+              start: DateTime.parse(previousOngoingTime), end: DateTime.now())
+          .duration
+          .inSeconds;
+      timerV = Timer.periodic(const Duration(seconds: 1), (timer) {
+        setState(() {
+          ongoingTime =
+              timeSecToHours(timeInSecond: ongoingTimeInSeconds.value++);
+        });
+      });
+    }
+    ongoingTimeInSeconds.addListener(
+      () async {
+        //get current ongoing course limit time
+        int i = 0;
+        for (bool element in courseOngoing) {
+          if (element) break;
+          i++;
+        }
+        List<int> countDownList = await tdb.getCountDowns(); // in minutes
+        // play alarm
+        if (ongoingTimeInSeconds.value > countDownList[i] &&
+            player.state != PlayerState.playing &&
+            !knowingPlayed) {
+          int countDown = countDownList[i];
+          player.play(AssetSource('audio/mixkit-goals-are-ahead-146.mp3'));
+          ScaffoldMessenger.of(context).showMaterialBanner(
+            MaterialBanner(
+              content: Text("已经过了$countDown分钟了, 需要休息啦"),
+              actions: [
+                TextButton(
+                    onPressed: (() {
+                      knowingPlayed = true;
+                      ScaffoldMessenger.of(context).hideCurrentMaterialBanner();
+                      player.stop();
+                    }),
+                    child: const Text("知道了"))
+              ],
+            ),
+          );
+        }
+      },
+    );
     setState(() {
+      ongoingTime = timeSecToHours(timeInSecond: ongoingTimeInSeconds.value);
       loadingFinish = true;
     });
   }
