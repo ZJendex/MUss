@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:muss/main.dart';
@@ -18,7 +19,9 @@ class CoursesMainPage extends StatefulWidget {
   State<CoursesMainPage> createState() => _CoursesMainPageState();
 }
 
-class _CoursesMainPageState extends State<CoursesMainPage> {
+class _CoursesMainPageState extends State<CoursesMainPage>
+    with WidgetsBindingObserver {
+  ValueNotifier _appLifecycleState = ValueNotifier(AppLifecycleState);
   final player = AudioPlayer();
   String appName = "奶奶用时记录";
   TxtDB tdb = TxtDB();
@@ -33,12 +36,29 @@ class _CoursesMainPageState extends State<CoursesMainPage> {
   bool knowingPlayed = false;
 
   @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // TODO: implement didChangeAppLifecycleState
+    super.didChangeAppLifecycleState(state);
+    setState(() {
+      _appLifecycleState.value = state;
+    });
+  }
+
+  @override
   void initState() {
     super.initState();
     initInfo();
     notificationPlugin
         .setListenerForLowerVersions(onNotificationInLowerVersions);
     notificationPlugin.setOnNotificationClick(onNotificationClick);
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
   }
 
   @override
@@ -165,24 +185,6 @@ class _CoursesMainPageState extends State<CoursesMainPage> {
                       Icons.restart_alt,
                     ),
                   ))),
-          Visibility(
-              visible: loadingFinish,
-              child: Padding(
-                  padding: const EdgeInsets.only(right: 20.0),
-                  child: GestureDetector(
-                    onTap: () async {
-                      // await notificationPlugin.showNotification(
-                      //     "该休息了！", "已经过了x分钟了", "test payload");
-                      await notificationPlugin.showScheduledNotification(
-                          "该休息了！",
-                          "已经过了x分钟了",
-                          "test payload",
-                          const Duration(seconds: 2));
-                    },
-                    child: const Icon(
-                      Icons.alarm,
-                    ),
-                  )))
         ]);
   }
 
@@ -296,7 +298,17 @@ class _CoursesMainPageState extends State<CoursesMainPage> {
           ],
         ),
       );
-
+      countDowns[index] == 0
+          ? notificationPlugin.showScheduledNotification(
+              "该休息了！",
+              "已经过了${countDowns[index]}分钟了",
+              "test payload",
+              const Duration(seconds: 2))
+          : notificationPlugin.showScheduledNotification(
+              "该休息了！",
+              "${tdb.coursesList[index]}已经过了${countDowns[index]}分钟了",
+              "test payload",
+              Duration(minutes: countDowns[index]));
       // visualized timer
       timerV = Timer.periodic(const Duration(seconds: 1), ((timer) {
         ongoingTimeInSeconds.value++;
@@ -314,6 +326,7 @@ class _CoursesMainPageState extends State<CoursesMainPage> {
       tdb.appendHistory("$courseName from ${now.toString()}");
     } else {
       // current courses finished
+      notificationPlugin.cancelAllNotification();
       knowingPlayed = false;
       timerV == null ? {} : {timerV!.cancel()};
       ongoingTimeInSeconds.value = 0;
@@ -348,7 +361,7 @@ class _CoursesMainPageState extends State<CoursesMainPage> {
   void initInfo() async {
     countDowns = await tdb.getCountDowns();
     String cds = await tdb.getCurrentDays();
-    // if it's the first time open the app
+    // if it's the first time open the app, create the database
     if (cds.isEmpty) {
       tdb.resetDB();
     }
@@ -386,8 +399,8 @@ class _CoursesMainPageState extends State<CoursesMainPage> {
           i++;
         }
         List<int> countDownList = await tdb.getCountDowns(); // in minutes
-        // play alarm
-        if (ongoingTimeInSeconds.value > countDownList[i] &&
+        // play alarm on time in minute
+        if (ongoingTimeInSeconds.value / 60 > countDownList[i] &&
             player.state != PlayerState.playing &&
             !knowingPlayed) {
           int countDown = countDownList[i];
@@ -406,6 +419,15 @@ class _CoursesMainPageState extends State<CoursesMainPage> {
               ],
             ),
           );
+        }
+      },
+    );
+    _appLifecycleState.addListener(
+      () {
+        if (_appLifecycleState.value == AppLifecycleState.resumed) {
+          RestartWidget.restartApp(context);
+        } else if (_appLifecycleState.value == AppLifecycleState.inactive) {
+          timerV == null ? {} : {timerV!.cancel()};
         }
       },
     );
