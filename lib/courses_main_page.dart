@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:muss/main.dart';
+import 'package:muss/notification_plugin.dart';
 import 'package:muss/update_countdown_widget.dart';
 import 'package:muss/update_database_widget.dart';
 import 'pkgs/pie_chart/pie_chart.dart';
@@ -19,7 +20,7 @@ class CoursesMainPage extends StatefulWidget {
 
 class _CoursesMainPageState extends State<CoursesMainPage> {
   final player = AudioPlayer();
-  String appName = "奶奶做事用时记录";
+  String appName = "奶奶用时记录";
   TxtDB tdb = TxtDB();
   List<bool> courseOngoing = List.filled(10, false); // maxium 10 courses
   bool loadingFinish = false;
@@ -35,6 +36,9 @@ class _CoursesMainPageState extends State<CoursesMainPage> {
   void initState() {
     super.initState();
     initInfo();
+    notificationPlugin
+        .setListenerForLowerVersions(onNotificationInLowerVersions);
+    notificationPlugin.setOnNotificationClick(onNotificationClick);
   }
 
   @override
@@ -159,6 +163,24 @@ class _CoursesMainPageState extends State<CoursesMainPage> {
                     },
                     child: const Icon(
                       Icons.restart_alt,
+                    ),
+                  ))),
+          Visibility(
+              visible: loadingFinish,
+              child: Padding(
+                  padding: const EdgeInsets.only(right: 20.0),
+                  child: GestureDetector(
+                    onTap: () async {
+                      // await notificationPlugin.showNotification(
+                      //     "该休息了！", "已经过了x分钟了", "test payload");
+                      await notificationPlugin.showScheduledNotification(
+                          "该休息了！",
+                          "已经过了x分钟了",
+                          "test payload",
+                          const Duration(seconds: 2));
+                    },
+                    child: const Icon(
+                      Icons.alarm,
                     ),
                   )))
         ]);
@@ -344,7 +366,6 @@ class _CoursesMainPageState extends State<CoursesMainPage> {
 
     // if app closed when ongoing courses still going, get back the countdown in real time
     if (previousOngoingTime != "") {
-      print(previousOngoingTime);
       ongoingTimeInSeconds.value = DateTimeRange(
               start: DateTime.parse(previousOngoingTime), end: DateTime.now())
           .duration
@@ -514,5 +535,10 @@ class _CoursesMainPageState extends State<CoursesMainPage> {
                 ],
               ),
             ))));
+  }
+
+  onNotificationInLowerVersions() {}
+  onNotificationClick(String payload) {
+    print("!!!ready to show notification $payload");
   }
 }
