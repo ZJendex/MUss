@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:muss/main.dart';
@@ -12,6 +11,8 @@ import 'txt_db.dart';
 import 'utils/courses_icon_correspondance.dart';
 import 'package:audioplayers/audioplayers.dart';
 
+import 'utils/math_conversion.dart';
+
 class CoursesMainPage extends StatefulWidget {
   const CoursesMainPage({super.key});
 
@@ -21,7 +22,7 @@ class CoursesMainPage extends StatefulWidget {
 
 class _CoursesMainPageState extends State<CoursesMainPage>
     with WidgetsBindingObserver {
-  ValueNotifier _appLifecycleState = ValueNotifier(AppLifecycleState);
+  final ValueNotifier _appLifecycleState = ValueNotifier(AppLifecycleState);
   final player = AudioPlayer();
   String appName = "奶奶用时记录";
   TxtDB tdb = TxtDB();
@@ -37,7 +38,6 @@ class _CoursesMainPageState extends State<CoursesMainPage>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    // TODO: implement didChangeAppLifecycleState
     super.didChangeAppLifecycleState(state);
     setState(() {
       _appLifecycleState.value = state;
@@ -56,7 +56,6 @@ class _CoursesMainPageState extends State<CoursesMainPage>
 
   @override
   void dispose() {
-    // TODO: implement dispose
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
@@ -82,51 +81,7 @@ class _CoursesMainPageState extends State<CoursesMainPage>
             floatingActionButton: FloatingActionButton(
               backgroundColor: const Color.fromARGB(255, 81, 118, 147), // 马耳他蓝
               onPressed: () async {
-                // get pie chart for the course distribution
-                Map<String, double> cumulateCoursesDuration = {};
-                await tdb
-                    .cumulateCoursesDuration()
-                    .then((value) => cumulateCoursesDuration = value);
-                showDialog(
-                    context: context,
-                    builder: (context) {
-                      return Container(
-                        padding: const EdgeInsets.all(50),
-                        child: PieChart(
-                            chartLegendSpacing: 70,
-                            centerText: "每日平均用时",
-                            centerTextStyle: const TextStyle(
-                                color: Colors.white70,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 18),
-                            chartValuesOptions: const ChartValuesOptions(
-                              showChartValueBackground: false,
-                              showChartValues: false,
-                              showChartValuesInPercentage: true,
-                              showChartValuesOutside: false,
-                              chartValueStyle: TextStyle(color: Colors.white),
-                            ),
-                            emptyColor: Colors.white,
-                            chartType: ChartType.ring,
-                            ringStrokeWidth: 100,
-                            colorList: pinknessColorList,
-                            legendOptions: LegendOptions(
-                                legendTextStyle: const TextStyle(
-                                  color: Color.fromARGB(210, 200, 233, 84),
-                                  decoration: TextDecoration.none,
-                                  fontSize: 12,
-                                ),
-                                legendTailTextStyle: TextStyle(
-                                  color: Colors.white.withOpacity(0.88),
-                                  decoration: TextDecoration.none,
-                                  fontSize: 12,
-                                ),
-                                legendPosition: LegendPosition.bottom,
-                                showLegendsInRow: false),
-                            dataMap: cumulateCoursesDuration),
-                      );
-                    },
-                    barrierColor: const Color.fromARGB(225, 0, 0, 0));
+                await showPieChart(context);
               },
               tooltip: 'Check the time use in pie chart',
               child: const Icon(Icons.pie_chart),
@@ -159,6 +114,54 @@ class _CoursesMainPageState extends State<CoursesMainPage>
               valueColor: AlwaysStoppedAnimation(Colors.black),
             )),
           );
+  }
+
+  Future<void> showPieChart(BuildContext context) async {
+    // get pie chart for the course distribution
+    Map<String, double> cumulateCoursesDuration = {};
+    await tdb
+        .cumulateCoursesDuration()
+        .then((value) => cumulateCoursesDuration = value);
+    showDialog(
+        context: context,
+        builder: (context) {
+          return Container(
+            padding: const EdgeInsets.all(50),
+            child: PieChart(
+                chartLegendSpacing: 70,
+                centerText: "每日平均用时",
+                centerTextStyle: const TextStyle(
+                    color: Colors.white70,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18),
+                chartValuesOptions: const ChartValuesOptions(
+                  showChartValueBackground: false,
+                  showChartValues: false,
+                  showChartValuesInPercentage: true,
+                  showChartValuesOutside: false,
+                  chartValueStyle: TextStyle(color: Colors.white),
+                ),
+                emptyColor: Colors.white,
+                chartType: ChartType.ring,
+                ringStrokeWidth: 100,
+                colorList: pinknessColorList,
+                legendOptions: LegendOptions(
+                    legendTextStyle: const TextStyle(
+                      color: Color.fromARGB(210, 200, 233, 84),
+                      decoration: TextDecoration.none,
+                      fontSize: 12,
+                    ),
+                    legendTailTextStyle: TextStyle(
+                      color: Colors.white.withOpacity(0.88),
+                      decoration: TextDecoration.none,
+                      fontSize: 12,
+                    ),
+                    legendPosition: LegendPosition.bottom,
+                    showLegendsInRow: false),
+                dataMap: cumulateCoursesDuration),
+          );
+        },
+        barrierColor: const Color.fromARGB(225, 0, 0, 0));
   }
 
   PreferredSizeWidget? _appBarWidget() {
@@ -229,24 +232,12 @@ class _CoursesMainPageState extends State<CoursesMainPage>
             Visibility(
               visible: courseOngoing[index],
               child: Text(
-                "${ongoingTime}",
-                style: TextStyle(fontSize: 18),
+                ongoingTime,
+                style: const TextStyle(fontSize: 18),
               ),
             )
           ],
         ));
-  }
-
-  timeSecToHours({required int timeInSecond}) {
-    int sec = timeInSecond % 60;
-    int timeInMin = (timeInSecond / 60).floor();
-    int min = timeInMin % 60;
-    int timeInHour = (timeInMin / 60).floor();
-    String hour =
-        timeInHour.toString().length <= 1 ? "0$timeInHour" : "$timeInHour";
-    String minute = min.toString().length <= 1 ? "0$min" : "$min";
-    String second = sec.toString().length <= 1 ? "0$sec" : "$sec";
-    return "$hour:$minute:$second";
   }
 
   void courseClicked(BuildContext context, int index) async {
@@ -561,6 +552,6 @@ class _CoursesMainPageState extends State<CoursesMainPage>
 
   onNotificationInLowerVersions() {}
   onNotificationClick(String payload) {
-    print("!!!ready to show notification $payload");
+    // print("!!!ready to show notification $payload");
   }
 }

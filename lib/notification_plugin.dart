@@ -3,13 +3,12 @@
 
 import 'dart:io';
 
-import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:rxdart/subjects.dart';
 
 class NotificationPlugin {
   late FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin;
-  late var initializationSettings;
+  late InitializationSettings initializationSettings;
   final BehaviorSubject<ReceivedNotification>
       didReceivedLocalNotificationSubject =
       BehaviorSubject<ReceivedNotification>();
@@ -30,7 +29,7 @@ class NotificationPlugin {
 
   void initializedPlatformSpecifics() {
     var initializationSettingsAndroid =
-        AndroidInitializationSettings("@mipmap/muss_trans");
+        const AndroidInitializationSettings("@mipmap/muss_trans");
     var initializationSettingsIOS = DarwinInitializationSettings(
       requestAlertPermission: true,
       requestBadgePermission: true,
@@ -73,18 +72,14 @@ class NotificationPlugin {
     }));
   }
 
-  void onDidReceiveNotificationResponse(NotificationResponse details) {
-    print("this is response!");
-  }
-
   Future<void> showNotification(
       String title, String body, String payload) async {
     var androidChannelSpecifics = const AndroidNotificationDetails(
         'CHANNEL_ID', 'CHANNEL_NAME',
         channelDescription: 'CHANNEL_DESCRIPTION',
-        importance: Importance.high,
-        priority: Priority.high);
-    var iosChannelSpecifics = DarwinNotificationDetails();
+        importance: Importance.max,
+        priority: Priority.max);
+    var iosChannelSpecifics = const DarwinNotificationDetails();
     var platformChannelSpecifics = NotificationDetails(
         android: androidChannelSpecifics, iOS: iosChannelSpecifics);
     await flutterLocalNotificationsPlugin
@@ -97,9 +92,11 @@ class NotificationPlugin {
     var androidChannelSpecifics = const AndroidNotificationDetails(
         'CHANNEL_ID_2', 'CHANNEL_NAME_2',
         channelDescription: 'CHANNEL_DESCRIPTION_2',
-        importance: Importance.high,
+        importance: Importance.max,
         priority: Priority.high);
-    var iosChannelSpecifics = DarwinNotificationDetails();
+    // notification priority in Android
+    // https://developer.android.com/develop/ui/views/notifications#Heads-up
+    var iosChannelSpecifics = const DarwinNotificationDetails();
     var platformChannelSpecifics = NotificationDetails(
         android: androidChannelSpecifics, iOS: iosChannelSpecifics);
     await flutterLocalNotificationsPlugin.schedule(

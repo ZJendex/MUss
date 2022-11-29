@@ -20,7 +20,7 @@ class MyApp extends StatelessWidget {
 }
 
 class RestartWidget extends StatefulWidget {
-  RestartWidget({required this.child});
+  const RestartWidget({super.key, required this.child});
 
   final Widget child;
 
